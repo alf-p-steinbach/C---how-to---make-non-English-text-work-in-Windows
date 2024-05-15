@@ -63,19 +63,21 @@ In addition to understanding a variable number of bytes per character, the {fmt}
 
 {fmt} supports left-, right- and center-alignment of a text in a field of a (possibly dynamic) specified number of cells. But unfortunately the library doesn’t directly expose its internal estimate of the text’s display width, which you need for e.g. displaying a box of dynamic width suitable for containing a given text. However you can obtain that number by formatting the text + e.g. `!` (any non-space single cell character) as left-adjusted in a field *n* cells wide, where *n* is at least 1 + the number of bytes in the text representation; count the number of trailing spaces in the result; and do the math:
 
-    // Can be optimized in umpteen ways, but if that's a concern better use a 3rd party library.
-    auto display_width_of( in_<string_view> s )
-        -> int
-    {
-        const string    sx                  = string( s ) + '!';    // A non-space single cell character.
-        const int       n_sx_bytes          = intsize_of( sx );
-        const int       field_width         = n_sx_bytes;
-        const string    field               = format( "{:{}s}", sx, field_width );
-        const int       n_padding_spaces    = static_cast<int>( field.size() - field.rfind( '!' ) - 1 );
-        const int       sx_width            = field_width - n_padding_spaces;
+```cpp
+// Can be optimized in umpteen ways, but if that's a concern better use a 3rd party library.
+auto display_width_of( in_<string_view> s )
+    -> int
+{
+    const string    sx                  = string( s ) + '!';    // A non-space single cell character.
+    const int       n_sx_bytes          = intsize_of( sx );
+    const int       field_width         = n_sx_bytes;
+    const string    field               = format( "{:{}s}", sx, field_width );
+    const int       n_padding_spaces    = static_cast<int>( field.size() - field.rfind( '!' ) - 1 );
+    const int       sx_width            = field_width - n_padding_spaces;
 
-        return sx_width - 1;
-    }
+    return sx_width - 1;
+}
+```
 
 Alternatively there are 3rd party libraries that do accurate display width estimates, more efficiently, for Unicode text.
 
@@ -131,6 +133,16 @@ That’s a lot of magic incantations &mdash; long reams of just semi-documented 
 Positive: this also fixes the encoding of environment variables as viewed by [`getenv()`](https://en.cppreference.com/w/cpp/utility/program/getenv).
 
 Negative: in C++ it does not necessarily fix the encoding assumption for `char` based strings passed to wide streams, and in the Windows API GDI graphics (e.g. `TextOutA()`) does not honor the process ANSI codepage.
+
+A program that assumes UTF-8 as the process’ ANSI codepage should better assert that it really is so;
+
+```
+#ifdef _WIN32
+    assert( GetACP() == 65001 or !"Need UTF-8 as the process’ ANSI code page." );
+#endif
+```
+
+&hellip; which requires a declaration of `GetACP`, e.g. via the `<windows.h>` header.
 
 ### 5. *How* to make `std::filesystem::path` work in Windows.
 
