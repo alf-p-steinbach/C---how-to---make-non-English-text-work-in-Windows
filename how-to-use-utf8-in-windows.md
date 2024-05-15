@@ -136,7 +136,7 @@ Negative: in C++ it does not necessarily fix the encoding assumption for `char` 
 
 A program that assumes UTF-8 as the process’ ANSI codepage should better assert that it really is so;
 
-```
+```cpp
 #ifdef _WIN32
     assert( GetACP() == 65001 or !"Need UTF-8 as the process’ ANSI code page." );
 #endif
