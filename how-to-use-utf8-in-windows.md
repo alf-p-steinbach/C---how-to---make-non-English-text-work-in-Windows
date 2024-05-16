@@ -148,19 +148,28 @@ Also worth noting, instead of adding these files and toolchain dependent tool us
 
 ### 5. *How* to make `std::filesystem::path` guaranteed work.
 
-By so far taking charge of (or alternatively working around) 5 text encodings,
+By so far taking charge of &mdash; or alternatively working around &mdash; 5 text encodings,
 
 1. the encoding your editor saves source code files with;
 2. the encoding the compiler assumes for a source code file;
 3. the encoding the compiler uses to store `char` based literals;
 4. the encoding the console assumes for a program’s byte stream output; and
-5. the encoding that Windows assumes for calls of `char` based API functions from your process,
+5. the process ANSI encoding that Windows assumes for calls of `char` based API functions from your process,
 
-&hellip; UTF-8 encoded filesystem paths now Just Work&trade;.
+&hellip; UTF-8 encoded filesystem paths now Just Work&trade; with the classic C++03 file handling.
 
-For example, `ifstream f( "æøå-poem.txt" );` now works.
+For example, the declaration `ifstream f( "æøå-poem.txt" );` now works.
 
-But one cost, a price paid for that, is that without (5) `ifstream f( fs::path( "æøå-poem.txt" ) );`, where `fs` is an alias for `std::filesystem`, no longer works&hellip; Because with just (1) through (4) `fs::path` incorrectly expects the `char`-based text to be encoded with the global Windows ANSI encoding. And depending on the `fs::path` implementation that may still happen with (5) in play.
+But one cost, a price paid for that, is that without (5) the C++17 declaration `ifstream f( fs::path( "æøå-poem.txt" ) );`, where `fs` is an alias for `std::filesystem`, no longer can work&hellip; Because with just (1) through (4) `fs::path` incorrectly expects the `char`-based text to be encoded with the global Windows ANSI encoding. And depending on the `fs::path` implementation that may still happen with (5) in play.
 
-TANSTAAFL: *There Ain’t No Such Thing As A Free Lunch*.
+A small [test program](apps/report_encodings/report_encodings.cpp) with all of the measures (1) through (5) in place, reported:
+
+| Compiler: | `fs::path` assumes that a `char` string is encoded with: | Effectively: |
+|-----------|----------------------------------------------------------|--------------|
+| Visual C++ version 19.35.32215 for x64 | the process ANSI codepage, from `GetACP` | UTF-8 |
+| MinGW g++ version 11.2.0 for x64 | the system ANSI codepage e.g. from `GetLocaleInfo` | E.g. cp 1252 |
+
+Which means that with MinGW g++ 11.2.0 `fs::path` garbles a `char`-based path specification with non-ASCII characters.
+
+***TANSTAAFL***: *There Ain’t No Such Thing As A Free Lunch*.
 
