@@ -23,7 +23,7 @@ international characters in filesystem paths, or in environment variables, or in
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
-### 1. *How* to display non-English characters in the Windows console.
+### 1. *How* to display non-English characters in the console.
 
 To make ordinary output via e.g. `cout` work in Windows you need to take control of four text encodings (how text is represented as a sequence of byte values):
 
@@ -81,7 +81,7 @@ auto display_width_of( in_<string_view> s )
 
 Alternatively there are 3rd party libraries that do accurate display width estimates, more efficiently, for Unicode text.
 
-### 3. *How* to input non-English characters from the Windows console.
+### 3. *How* to input non-English characters from the console.
 
 For ***input*** it doesn’t suffice to set the Windows console to assume UTF-8.
 
@@ -94,7 +94,7 @@ Or you can implement it yourself via Windows’ console API, e.g. [`ReadConsoleW
 For, the problem is not Windows or Windows consoles, but merely low Quality of Implementation for this in all (I believe) Windows C++ standard library implementations, where byte stream oriented code that works fine in *nix systems has been blindly, and incorrectly, copied over to the Windows implementation. That’s sort of like the Ariane rocket failure. In both cases caused by management or possibly coders doing the easy reuse thing and disregarding critical assumptions.
 
 
-### 4. *How* to get the `main` arguments UTF-8 encoded in Windows.
+### 4. *How* to get the `main` arguments UTF-8 encoded.
 
 In Windows the `main` arguments `argv` are the original UTF-16 encoded command line arguments (which can be obtained via `GetCommandLine()` + `CommandLineToArgvW()`) translated to the process’ Windows ANSI encoding (the result of `GetACP()`). And by default `GetACP()` returns Windows’ global Windows ANSI encoding, in Western countries usually codepage 1252 = Windows ANSI Western, which is a single byte per character Latin-1 extension. So by  default this is a **lossy conversion** where e.g. filenames specified as command line arguments, can be irrevocably trashed.
 
@@ -130,7 +130,7 @@ A minimal resource script for a manifest resource named “app-manifest.xml”:
 ```
 That’s a lot of magic incantations &mdash; long reams of just semi-documented apparently arbitrary technobabble text &mdash; just to flip a binary decision in the direction that should be the default. At worst it should have been a simple yes/no compiler option. But, again, Microsoft.
 
-Positive: this also fixes the encoding of environment variables as viewed by [`getenv()`](https://en.cppreference.com/w/cpp/utility/program/getenv).
+Positive: this also fixes the encoding of environment variables as viewed by [`getenv()`](https://en.cppreference.com/w/cpp/utility/program/getenv), and with luck it also fixes naïve use of `std::filesystem::path`.
 
 Negative: in C++ it does not necessarily fix the encoding assumption for `char` based strings passed to wide streams, and in the Windows API GDI graphics (e.g. `TextOutA()`) does not honor the process ANSI codepage.
 
@@ -144,10 +144,23 @@ A program that assumes UTF-8 as the process’ ANSI codepage should better asser
 
 &hellip; which requires a declaration of `GetACP`, e.g. via the `<windows.h>` header.
 
-Also worth noting, instead of adding these files and toolchain dependent tool usage to every micro-project it’s possible to create a little program that inserts a suitable application manifest resource in an existing executable, and just run that at the end of every successful build. Windows has a number of API functions that do the basic update-the-executable for you, i.e. there’s no need to go down to the dark art level of patching binaries. For example, you can use Windows’ `UpdateResource`. When I once did this I chose to let that UTF-8 enabling program itself use UTF-16 encoded `wchar_t` based text. [The code](apps/set_utf8_as_ansi_codepage/source/app/main.cpp) can be worth looking at: it exemplifies general UTF-16 to UTF-8 conversion in Windows; how to retrieve UTF-16 encoded command line arguments (instead of using possibly trashed `main` arguments); and of course, it shows how to update or create an application manifest resource in an existing executable, though without any fail-safes.
+Also worth noting, instead of adding these files and toolchain dependent tool usage to every micro-project it’s possible to create a little program that inserts a suitable application manifest resource in an existing executable, and just run that at the end of every successful build. Windows has a number of API functions that do the basic update-the-executable for you, i.e. there’s no need to go down to the dark art level of patching binaries. For example, you can use Windows’ `UpdateResource`. When I once did this I chose to let that UTF-8 enabling program itself use UTF-16 encoded `wchar_t` based text. [The code](apps/set_utf8_as_ansi_codepage/source/app/main.cpp) can be worth looking at: it exemplifies general UTF-16 to UTF-8 conversion in Windows; how to retrieve UTF-16 encoded command line arguments (instead of using possibly trashed `main` arguments); and of course, it shows how to update or create an application manifest resource in an existing executable, though without complete fail-safety.
 
-### 5. *How* to make `std::filesystem::path` work in Windows.
+### 5. *How* to make `std::filesystem::path` guaranteed work.
 
+By so far taking charge of (or alternatively working around) 5 text encodings,
 
-asdßd
+1. the encoding your editor saves source code files with;
+2. the encoding the compiler assumes for a source code file;
+3. the encoding the compiler uses to store `char` based literals;
+4. the encoding the console assumes for a program’s byte stream output; and
+5. the encoding that Windows assumes for calls of `char` based API functions from your process,
+
+&hellip; UTF-8 encoded filesystem paths now Just Work&trade;.
+
+For example, `ifstream f( "æøå-poem.txt" );` now works.
+
+But one cost, a price paid for that, is that without (5) `ifstream f( fs::path( "æøå-poem.txt" ) );`, where `fs` is an alias for `std::filesystem`, no longer works&hellip; Because with just (1) through (4) `fs::path` incorrectly expects the `char`-based text to be encoded with the global Windows ANSI encoding. And depending on the `fs::path` implementation that may still happen with (5) in play.
+
+TANSTAAFL: *There Ain’t No Such Thing As A Free Lunch*.
 
