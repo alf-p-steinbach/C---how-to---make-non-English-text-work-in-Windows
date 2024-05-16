@@ -14,11 +14,11 @@ international characters in filesystem paths, or in environment variables, or in
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [1. *How* to display non-English characters in the Windows console.](#1-how-to-display-non-english-characters-in-the-windows-console)
+- [1. *How* to display non-English characters in the console.](#1-how-to-display-non-english-characters-in-the-console)
 - [2. *How* to format fixed width fields (regardless of Windows/\*nix/whatever platform).](#2-how-to-format-fixed-width-fields-regardless-of-windows%5Cnixwhatever-platform)
-- [3. *How* to input non-English characters from the Windows console.](#3-how-to-input-non-english-characters-from-the-windows-console)
-- [4. *How* to get the `main` arguments UTF-8 encoded in Windows.](#4-how-to-get-the-main-arguments-utf-8-encoded-in-windows)
-- [5. *How* to make `std::filesystem::path` work in Windows.](#5-how-to-make-stdfilesystempath-work-in-windows)
+- [3. *How* to input non-English characters from the console.](#3-how-to-input-non-english-characters-from-the-console)
+- [4. *How* to get the `main` arguments UTF-8 encoded.](#4-how-to-get-the-main-arguments-utf-8-encoded)
+- [5. *How* to make `std::filesystem::path` guaranteed work.](#5-how-to-make-stdfilesystempath-guaranteed-work)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
