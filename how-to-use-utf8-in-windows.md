@@ -165,7 +165,7 @@ But one cost, a price paid for that, is that without (5) the C++17 declaration `
 A small [test program](apps/report_encodings/report_encodings.cpp) with all of the measures (1) through (5) in place, reported:
 
 | Compiler: | `fs::path` assumes that a `char` string is encoded with: | Effectively: |
-|-----------|----------------------------------------------------------|--------------|
+|:----------|:---------------------------------------------------------|:-------------|
 | Visual C++ version 19.35.32215 for x64 | the process ANSI codepage, from `GetACP` | UTF-8 |
 | MinGW g++ version 11.2.0 for x64 | the system ANSI codepage e.g. from `GetLocaleInfo` | E.g. cp 1252 |
 
