@@ -44,11 +44,11 @@ Here `_WIN32` is a macro that’s automatically defined in 32-bit and 64-bit Win
 
 But instead of changing the console’s expectation for byte stream output yourself, you can use e.g. [the {fmt} library](https://github.com/fmtlib/fmt)’s `fmt::print` for output, which if possible presents UTF-8 correctly. This functionality is also available as `std::print` in the C++23 standard library.
 
-Other compilers than g++ won’t necessarily assume and use UTF-8 for respectively source code and literals. In particular Visual C++ by default assumes and uses Windows ANSI, which depends on the configuration of Windows. That means that the encoding of literals by default depends on in which country you compiled, which as of 2024 is silly and counter productive.
+Other compilers than g++ won’t necessarily assume and use UTF-8 for respectively source code and literals. In particular Visual C++ by default assumes Windows ANSI for source code (unless there is an UTF-8 BOM), and Windows ANSI depends on the configuration of Windows. Earlier, at least as late as Visual C++ 2015, the encoding of literals was also Windows ANSI by default, which meant that it depended on which country you compiled in (!). Happily at some point the default literals encoding, the default C++ **execution character set**, was changed to UTF-8. However this seems to be undocumented.
 
 For Visual C++ you can use option [**`/utf-8`**](https://learn.microsoft.com/en-us/cpp/build/reference/utf-8-set-source-and-executable-character-sets-to-utf-8) to set both the source code encoding assumption and the encoding of literals.
 
-As of 2024 this option is not yet supported by Visual Studio’s project property dialogs, but in those dialogs you can set it “manually” as (part of) the text for the “advanced” options.
+As of 2024 this option is not yet supported by Visual Studio’s project property dialogs, but in those dialogs you can set it “manually” as (part of) the text for [the “Command Line” options](images/vs-utf8-option.annotated.png).
 
 I believe but do not know that the same needs to be done for clang++ in Windows, because in Windows it’s positioned itself roughly as a replacement for Visual C++.
 
@@ -85,7 +85,7 @@ Alternatively there are 3rd party libraries that do accurate display width estim
 
 For ***input*** it doesn’t suffice to set the Windows console to assume UTF-8.
 
-UTF-8 for console byte stream input is unsupported down at the Windows API level: non-ASCII input characters just produce nullbytes.
+UTF-8 for console byte stream input is unsupported down at the Windows API level: [non-ASCII input characters just produce nullbytes](https://github.com/microsoft/terminal/issues/4551).
 
 However, you can do UTF-8 console input via third party libraries such as [Boost NoWide](https://www.boost.org/doc/libs/1_85_0/libs/nowide/doc/html/index.html).
 
