@@ -48,7 +48,9 @@ Other compilers than g++ won’t necessarily assume and use UTF-8 for respective
 
 For Visual C++ you can use option [**`/utf-8`**](https://learn.microsoft.com/en-us/cpp/build/reference/utf-8-set-source-and-executable-character-sets-to-utf-8) to set both the source code encoding assumption and the encoding of literals.
 
-As of 2024 this option is not yet supported by Visual Studio’s project property dialogs, but in those dialogs you can set it “manually” as (part of) the text for [the “Command Line” options](images/vs-utf8-option.annotated.png).
+As of 2024 this option is not yet supported by Visual Studio’s project property dialogs, but in those dialogs you can set it “manually” as (part of) the text for the “Command Line” options:
+
+<img alt="The Visual Studio “Command Line” options" src="images/vs-utf8-option.annotated.png" width="75%"/>
 
 I believe but do not know that the same needs to be done for clang++ in Windows, because in Windows it’s positioned itself roughly as a replacement for Visual C++.
 
