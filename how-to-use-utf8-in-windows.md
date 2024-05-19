@@ -175,7 +175,7 @@ A small [test program](apps/report_encodings/report_encodings.cpp) with all of t
 
 Which means that with MinGW g++ 11.2.0 `fs::path` garbles a `char`-based path specification with non-ASCII characters.
 
-Unfortunately *it’s g++ that is standard-conforming here*. The C++ standard requires `std::filesystem::path` to misbehave &mdash; to garble text &mdash; by default in an UTF-8 based Windows program. because the specification stems from before Windows got UTF-8 support in June 2019, i.e. before there was a *process* ANSI codepage. The ridiculous required text garbling affects
+Unfortunately *it’s g++ that is standard-conforming here*. The C++ standard requires `std::filesystem::path` to misbehave &mdash; to garble text &mdash; by default in an UTF-8 based Windows program, because the specification stems from before Windows got UTF-8 support in June 2019, i.e. before there was a *process* ANSI codepage. The ridiculous required text garbling affects
 
 | Part: | Workaround measure(s): |
 |:------|:---------|
