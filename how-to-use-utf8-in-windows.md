@@ -146,7 +146,7 @@ A program that assumes UTF-8 as the process’ ANSI codepage should better asser
 
 Also worth noting, instead of adding these files and toolchain dependent tool usage to every micro-project it’s possible to create a little program that inserts a suitable application manifest resource in an existing executable, and just run that at the end of every successful build. Windows has a number of API functions that do the basic update-the-executable for you, i.e. there’s no need to go down to the dark art level of patching binaries. For example, you can use Windows’ `UpdateResource`. When I once did this I chose to let that UTF-8 enabling program itself use UTF-16 encoded `wchar_t` based text. [The code](apps/set_utf8_as_ansi_codepage/source/app/main.cpp) can be worth looking at: it exemplifies general UTF-16 to UTF-8 conversion in Windows; how to retrieve UTF-16 encoded command line arguments (instead of using possibly trashed `main` arguments); and of course, it shows how to update or create an application manifest resource in an existing executable.
 
-### 5. *How* to make `std::filesystem::path` guaranteed work.
+### 5. *How* to make `std::filesystem::path` work.
 
 By so far taking charge of &mdash; or alternatively working around &mdash; 5 text encodings,
 
@@ -162,6 +162,10 @@ For example, the declaration `ifstream f( "æøå-poem.txt" );` now works.
 
 But one cost, a price paid for that, is that without (5) the C++17 declaration `ifstream f( fs::path( "æøå-poem.txt" ) );`, where `fs` is an alias for `std::filesystem`, no longer can work&hellip; Because with just (1) through (4) `fs::path` incorrectly expects the `char`-based text to be encoded with the global Windows ANSI encoding. And depending on the `fs::path` implementation that may still happen with (5) in play.
 
+***TANSTAAFL***: *There Ain’t No Such Thing As A Free Lunch*.
+
+---
+
 A small [test program](apps/report_encodings/report_encodings.cpp) with all of the measures (1) through (5) in place, reported:
 
 | Compiler: | `fs::path` assumes that a `char` string is encoded with: | Effectively: |
@@ -171,5 +175,17 @@ A small [test program](apps/report_encodings/report_encodings.cpp) with all of t
 
 Which means that with MinGW g++ 11.2.0 `fs::path` garbles a `char`-based path specification with non-ASCII characters.
 
-***TANSTAAFL***: *There Ain’t No Such Thing As A Free Lunch*.
+Unfortunately *it’s g++ that is standard-conforming here*. The C++ standard requires `std::filesystem::path` to misbehave &mdash; to garble text &mdash; by default in an UTF-8 based Windows program. because the specification stems from before Windows got UTF-8 support in June 2019, i.e. before there was a *process* ANSI codepage. The ridiculous required text garbling affects
+
+| Part: | Workaround measure(s): |
+|:------|:---------|
+| The constructors. | Use a DIY `make_path` function. |
+| Parts assembly via `/`, `/=`, `+`, `+=`, `.append` and `.concat`. | Use DIY operators. |
+| The `.string()` result. | Use a DIY `to_string` function instead. |
+| Iostreams i/o via `<<` and `>>`. | Use DIY `<<` and `>>` instead. |
+| C++26 formatting via `std::formatter`. | &mdash; |
+
+On top of the mandated misbehavior comes a bit of sabotage introduced in C++20, that in C++20 and later `.u8string()` produces a `std::u8string` which is not movable to a `std::string`, and so introducing a totally needless copying inefficiency for UTF-8 based Windows applications, plus that in C++20 the `u8path` helper function for path creation from UTF-8 is deprecated, which however is compensated with `char8_t` based construction.
+
+
 
