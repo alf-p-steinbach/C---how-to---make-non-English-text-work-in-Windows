@@ -175,13 +175,11 @@ A small [test program](apps/report_encodings/report_encodings.cpp) with all of t
 
 Which means that with MinGW g++ 11.2.0 `fs::path` garbles a `char`-based path specification with non-ASCII characters.
 
-***TANSTAAFL***: *There Ain’t No Such Thing As A Free Lunch*.
-
-
+*TANSTAAFL*: *There Ain’t No Such Thing As A Free Lunch*.
 
 ---
 
-Unfortunately *it’s g++ that is standard-conforming here*. The C++ standard requires `fs::path` to misbehave &mdash; to garble text &mdash; by default in a UTF-8 based Windows program, because the specification stems from before Windows got UTF-8 support in June 2019, i.e. before there was a *process* ANSI codepage. The ridiculous required text garbling (it would have been a single word fix in the standard, “system” → “process”) affects
+Unfortunately it’s g++ that is standard-conforming here. The C++ standard requires `fs::path` to garble text by default in a UTF-8 based Windows program, because the specification stems from before Windows got UTF-8 support in June 2019, i.e. before there was a *process* ANSI codepage. The ridiculous required text garbling &mdash; it would have been a single word fix in the standard, “system” → “process” &mdash; affects
 
 * the constructors;
 * assignment via `=`;
@@ -190,13 +188,15 @@ Unfortunately *it’s g++ that is standard-conforming here*. The C++ standard re
 * iostreams i/o via `<<` and `>>`; and
 * C++26 formatting via `std::formatter`.
 
-As I see it it’s not feasible to guard against inadvertent incorrect use of these features, except by
+As I see it it’s not feasible to guard against text garbling with all these features, except by
 
-* *disallowing all direct use of `fs::path`*.
+* ***disallowing all direct use of `fs::path`***.
 
-I.e. a practical solution is to use a DIY `Path` class &mdash; client code doesn’t need to know whether it’s a totally distinct class or a simple wrapper because with (5) fixed the C++11 `fs::path` based file open functions are only needed for [Very Long Paths&trade;](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation) (in the Windows API represented as `wchar_t` based strings), and one can choose to simply not support them.
+I.e. a practical solution is to (only) use a DIY `Path` class &mdash; client code doesn’t need to know whether it’s a totally distinct class or a simple wrapper because with (5) fixed the C++11 `fs::path` based file open functions are only needed for [Very Long Paths&trade;](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation), in the Windows API represented as `wchar_t` based strings, and one can choose to simply not support them.
 
 Another reason to use a wrapper or distinct `Path` class: on top of the mandated misbehavior a bit of sabotage was introduced in C++20, that in C++20 and later `.u8string()` produces a `std::u8string` which is not movable to a `std::string`, and so introducing a totally needless copying inefficiency for UTF-8 based Windows applications, plus that in C++20 the `u8path` helper function for path creation from UTF-8 is deprecated, which however is compensated for with `char8_t` based construction.
+
+---
 
 
 
