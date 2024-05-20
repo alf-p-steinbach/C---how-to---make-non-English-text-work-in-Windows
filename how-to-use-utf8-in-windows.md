@@ -18,7 +18,7 @@ international characters in filesystem paths, or in environment variables, or in
 - [2. *How* to format fixed width fields (regardless of Windows/\*nix/whatever platform).](#2-how-to-format-fixed-width-fields-regardless-of-windows%5Cnixwhatever-platform)
 - [3. *How* to input non-English characters from the console.](#3-how-to-input-non-english-characters-from-the-console)
 - [4. *How* to get the `main` arguments UTF-8 encoded.](#4-how-to-get-the-main-arguments-utf-8-encoded)
-- [5. *How* to make `std::filesystem::path` guaranteed work.](#5-how-to-make-stdfilesystempath-guaranteed-work)
+- [5. *How* to make `std::filesystem::path` (do the) work.](#5-how-to-make-stdfilesystempath-do-the-work)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -148,7 +148,7 @@ A program that assumes UTF-8 as the process’ ANSI codepage should better asser
 
 Also worth noting, instead of adding these files and toolchain dependent tool usage to every micro-project it’s possible to create a little program that inserts a suitable application manifest resource in an existing executable, and just run that at the end of every successful build. Windows has a number of API functions that do the basic update-the-executable for you, i.e. there’s no need to go down to the dark art level of patching binaries. For example, you can use Windows’ `UpdateResource`. When I once did this I chose to let that UTF-8 enabling program itself use UTF-16 encoded `wchar_t` based text. [The code](apps/set_utf8_as_ansi_codepage/source/app/main.cpp) can be worth looking at: it exemplifies general UTF-16 to UTF-8 conversion in Windows; how to retrieve UTF-16 encoded command line arguments (instead of using possibly trashed `main` arguments); and of course, it shows how to update or create an application manifest resource in an existing executable.
 
-### 5. *How* to make `std::filesystem::path` work.
+### 5. *How* to make `std::filesystem::path` (do the) work.
 
 By so far taking charge of &mdash; or alternatively working around &mdash; 5 text encodings,
 
@@ -181,7 +181,7 @@ Which means that with MinGW g++ 11.2.0 `fs::path` garbles a `char`-based path sp
 
 ---
 
-Unfortunately *it’s g++ that is standard-conforming here*. The C++ standard requires `fs::path` to misbehave &mdash; to garble text &mdash; by default in an UTF-8 based Windows program, because the specification stems from before Windows got UTF-8 support in June 2019, i.e. before there was a *process* ANSI codepage. The ridiculous required text garbling affects
+Unfortunately *it’s g++ that is standard-conforming here*. The C++ standard requires `fs::path` to misbehave &mdash; to garble text &mdash; by default in a UTF-8 based Windows program, because the specification stems from before Windows got UTF-8 support in June 2019, i.e. before there was a *process* ANSI codepage. The ridiculous required text garbling (it would have been a single word fix in the standard, “system” → “process”) affects
 
 * the constructors;
 * assignment via `=`;
