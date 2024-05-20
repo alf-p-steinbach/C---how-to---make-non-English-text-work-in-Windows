@@ -194,7 +194,7 @@ As I see it it’s not feasible to guard against text garbling with all these fe
 
 I.e. a practical solution is to (only) use a DIY `Path` class &mdash; client code doesn’t need to know whether it’s a totally distinct class or a simple wrapper because with (5) fixed the C++11 `fs::path` based file open functions are only needed for [Very Long Paths&trade;](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation), in the Windows API represented as `wchar_t` based strings, and one can choose to simply not support them.
 
-Another reason to use a wrapper or distinct `Path` class: on top of the mandated misbehavior a bit of sabotage was introduced in C++20, that in C++20 and later `.u8string()` produces a `std::u8string` which is not movable to a `std::string`, and so introducing a totally needless copying inefficiency for UTF-8 based Windows applications, plus that in C++20 the `u8path` helper function for path creation from UTF-8 is deprecated, which however is compensated for with `char8_t` based construction.
+Another reason to use a wrapper or distinct `Path` class: on top of the required misbehavior a bit of sabotage was introduced in C++20, that in C++20 and later `.u8string()` produces a `std::u8string` which is not movable to a `std::string`, and so introducing a totally needless copying inefficiency for UTF-8 based Windows applications, plus that in C++20 the `u8path` helper function for path creation from UTF-8 is deprecated, which however is compensated for with `char8_t` based construction.
 
 ---
 
