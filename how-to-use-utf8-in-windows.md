@@ -162,11 +162,9 @@ By so far taking charge of &mdash; or alternatively working around &mdash; 5 tex
 
 For example, the declaration `ifstream f( "æøå-poem.txt" );` now works.
 
-But one cost, a price paid for that, is that without (5) the C++17 declaration `ifstream f( fs::path( "æøå-poem.txt" ) );`, where `fs` is an alias for `std::filesystem`, no longer can work&hellip; Because with just (1) through (4) `fs::path` incorrectly expects the `char`-based text to be encoded with the global Windows ANSI encoding. And depending on the `fs::path` implementation that may still happen with (5) in play.
+One cost, a price paid for that, is that without (5) the C++17 declaration `ifstream f( fs::path( "æøå-poem.txt" ) );`, where `fs` is an alias for `std::filesystem`, no longer can work&hellip; Because with just (1) through (4) `fs::path` incorrectly expects the `char`-based text to be encoded with the global Windows ANSI encoding. And depending on the `fs::path` implementation that may still happen with (5) in play.
 
-***TANSTAAFL***: *There Ain’t No Such Thing As A Free Lunch*.
-
----
+But is that theoretical possible `std::filesystem::path` problem with the process ANSI encoding as UTF-8, real?
 
 A small [test program](apps/report_encodings/report_encodings.cpp) with all of the measures (1) through (5) in place, reported:
 
@@ -177,17 +175,28 @@ A small [test program](apps/report_encodings/report_encodings.cpp) with all of t
 
 Which means that with MinGW g++ 11.2.0 `fs::path` garbles a `char`-based path specification with non-ASCII characters.
 
-Unfortunately *it’s g++ that is standard-conforming here*. The C++ standard requires `std::filesystem::path` to misbehave &mdash; to garble text &mdash; by default in an UTF-8 based Windows program, because the specification stems from before Windows got UTF-8 support in June 2019, i.e. before there was a *process* ANSI codepage. The ridiculous required text garbling affects
+***TANSTAAFL***: *There Ain’t No Such Thing As A Free Lunch*.
 
-| Part: | Workaround measure(s): |
-|:------|:---------|
-| The constructors. | Use a DIY `make_path` function. |
-| Parts assembly via `/`, `/=`, `+`, `+=`, `.append` and `.concat`. | Use DIY operators. |
-| The `.string()` result. | Use a DIY `to_string` function instead. |
-| Iostreams i/o via `<<` and `>>`. | Use DIY `<<` and `>>` instead. |
-| C++26 formatting via `std::formatter`. | &mdash; |
 
-On top of the mandated misbehavior comes a bit of sabotage introduced in C++20, that in C++20 and later `.u8string()` produces a `std::u8string` which is not movable to a `std::string`, and so introducing a totally needless copying inefficiency for UTF-8 based Windows applications, plus that in C++20 the `u8path` helper function for path creation from UTF-8 is deprecated, which however is compensated with `char8_t` based construction.
+
+---
+
+Unfortunately *it’s g++ that is standard-conforming here*. The C++ standard requires `fs::path` to misbehave &mdash; to garble text &mdash; by default in an UTF-8 based Windows program, because the specification stems from before Windows got UTF-8 support in June 2019, i.e. before there was a *process* ANSI codepage. The ridiculous required text garbling affects
+
+* the constructors;
+* assignment via `=`;
+* parts assembly via `/`, `/=`, `+`, `+=`, `.append` and `.concat`;
+* the `.string()` result;
+* iostreams i/o via `<<` and `>>`; and
+* C++26 formatting via `std::formatter`.
+
+As I see it it’s not feasible to guard against inadvertent incorrect use of these features, except by
+
+* *disallowing all direct use of `fs::path`*.
+
+I.e. a practical solution is to use a DIY `Path` class &mdash; client code doesn’t need to know whether it’s a totally distinct class or a simple wrapper, because with (5) fixed the C++11 `fs::path` based file open functions are not needed.
+
+Another reason to use a wrapper or distinct `Path` class: on top of the mandated misbehavior a bit of sabotage was introduced in C++20, that in C++20 and later `.u8string()` produces a `std::u8string` which is not movable to a `std::string`, and so introducing a totally needless copying inefficiency for UTF-8 based Windows applications, plus that in C++20 the `u8path` helper function for path creation from UTF-8 is deprecated, which however is compensated for with `char8_t` based construction.
 
 
 
