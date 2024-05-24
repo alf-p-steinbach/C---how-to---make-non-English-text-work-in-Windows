@@ -1,4 +1,4 @@
-// C++03 file handling; works with UTF-8 for all encodings.
+// C++03 file handling; works when UTF-8 is used for all encodings.
 #include <cppm.hpp>
 #include <fmt/core.h>
 
