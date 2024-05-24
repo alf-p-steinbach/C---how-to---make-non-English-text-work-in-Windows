@@ -162,9 +162,9 @@ By so far taking charge of &mdash; or alternatively working around &mdash; 5 tex
 
 For example, the declaration `ifstream f( "æøå-poem.txt" );` now works.
 
-One cost, a price paid for that, is that without (5) the C++17 declaration `ifstream f( fs::path( "æøå-poem.txt" ) );`, where `fs` is an alias for `std::filesystem`, no longer can work&hellip; Because with just (1) through (4) `fs::path` incorrectly expects the `char`-based text to be encoded with the global Windows ANSI encoding. And depending on the `fs::path` implementation that may still happen with (5) in play.
+This obviates the need for using `std::filesystem::path` to work around the Windows text encoding issues, which was the main rationale for its original incarnation in Boost, but its functionality for assembling and disassembling paths is one reason to still use it (convenience), and the distinction it makes between general string and filesystem path is another reason (correctness, clarity).
 
-But is that theoretical possible `std::filesystem::path` problem with the process ANSI encoding as UTF-8, real?
+However, a cost, a price paid for the “all UTF-8” environment, is that the C++17 declaration `ifstream f( fs::path( "æøå-poem.txt" ) );`, where `fs` is an alias for `std::filesystem`, is no longer is guaranteed to work&hellip; And as I read the standard it’s guaranteed to *not* work. Because: `fs::path` incorrectly expects the `char`-based text to be encoded with the **global Windows ANSI** encoding instead of the **process Windows ANSI** encoding.
 
 A small [test program](apps/report_encodings/report_encodings.cpp) with all of the measures (1) through (5) in place, reported:
 
@@ -173,7 +173,7 @@ A small [test program](apps/report_encodings/report_encodings.cpp) with all of t
 | Visual C++ version 19.35.32215 for x64 | the process ANSI codepage, from `GetACP` | UTF-8 ✅ |
 | MinGW g++ version 11.2.0 for x64 | the system ANSI codepage e.g. from `GetLocaleInfo` | E.g. cp 1252 ❌ |
 
-Which means that with MinGW g++ 11.2.0 `fs::path` garbles a `char`-based path specification with non-ASCII characters.
+Which means that with MinGW g++ 11.2.0 `fs::path` garbles a `char`-based path specification with non-ASCII characters, as the standard (apparently) requires.
 
 *TANSTAAFL*: *There Ain’t No Such Thing As A Free Lunch*.
 
