@@ -162,7 +162,7 @@ By so far taking charge of &mdash; or alternatively working around &mdash; 5 tex
 
 For example, the declaration `ifstream f( "æøå-poem.txt" );` now works.
 
-This obviates the need for using `std::filesystem::path` to work around the Windows text encoding issues, which was the main rationale for its original incarnation in Boost, but its functionality for assembling and disassembling paths is one reason to still use it (convenience), and the distinction it makes between general string and filesystem path is another reason (correctness, clarity).
+This obviates the need for using `std::filesystem::path` to work around the Windows text encoding issues, which was the main rationale for its original incarnation in Boost, but its functionality for assembling paths from parts and inspecting the parts of a path is one reason to still use it (convenience), and the distinction it makes between general string and filesystem path is another reason (correctness, clarity).
 
 However, a cost, a price paid for the “all UTF-8” environment, is that the C++17 declaration `ifstream f( fs::path( "æøå-poem.txt" ) );`, where `fs` is an alias for `std::filesystem`, is no longer is guaranteed to work&hellip; And as I read the standard it’s formally guaranteed to *not* work. Because: `fs::path` incorrectly expects the `char`-based text to be encoded with the **global Windows ANSI** encoding instead of the **process Windows ANSI** encoding.
 
@@ -179,9 +179,9 @@ Which means that with MinGW g++ 11.2.0 `fs::path` garbles a `char`-based path sp
 
 ---
 
-Unfortunately it’s g++ that is standard-conforming here. The C++ standard requires `fs::path` to garble text by default in a UTF-8 based Windows program, because the specification stems from before Windows got UTF-8 support in June 2019, i.e. before there was a *process* ANSI codepage. The ridiculous required text garbling &mdash; it would have been a single word fix in the standard, “system” → “process” &mdash; affects
+The ridiculous required text garbling &mdash; it would have been a single word fix in the standard, “system” → “process” &mdash; affects
 
-* the constructors;
+* the `fs::path` constructors;
 * assignment via `=`;
 * parts assembly via `/`, `/=`, `+`, `+=`, `.append` and `.concat`;
 * the `.string()` result;
