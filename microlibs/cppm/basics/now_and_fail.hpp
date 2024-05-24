@@ -7,7 +7,7 @@
 #include <string_view>
 
 namespace cppm {
-    using   fmt::vformat;
+    using   fmt::make_format_args, fmt::vformat;
     using   std::runtime_error,         // <stdexcept>
             std::string_view;           // <string>
 
@@ -18,6 +18,6 @@ namespace cppm {
         [[noreturn]]
         inline auto fail( in_<string_view> s, in_<Args>... args )
             -> bool
-        { throw runtime_error( vformat( s, fmt::make_format_args( args... ) ) ); }
+        { throw runtime_error( vformat( s, make_format_args( args... ) ) ); }
     }  // inline namespace now_and_fail
 }  // namespace cppm
