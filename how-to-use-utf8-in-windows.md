@@ -158,7 +158,7 @@ By so far taking charge of &mdash; or alternatively working around &mdash; 5 tex
 4. the encoding the console assumes for a program’s byte stream output; and
 5. the process ANSI encoding that Windows assumes for calls of `char` based API functions from your process,
 
-&hellip; UTF-8 encoded filesystem paths now Just Work&trade; with the classic C++03 file handling.
+&hellip; [UTF-8 encoded filesystem paths now Just Work&trade; with the classic C++03 file handling](code/æøå-poem.c++03.cpp).
 
 For example, the declaration `ifstream f( "æøå-poem.txt" );` now works.
 
