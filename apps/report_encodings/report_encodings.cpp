@@ -85,8 +85,10 @@ namespace app {
 
         out << "`std::filesystem::path` assumes a `char` string is "
             << (path_assumes_utf8? "process" : "system") << " ANSI encoded"
-            << " (UTF-8 “ø” yields " << n_code_points << " code points)."
-            << "\n";
+            << " (UTF-8 “ø” yields " << n_code_points << " code points:";
+        for( int i = 0; i < n_code_points; ++ i ) { out << " " << +Byte( dummy.u32string()[i] ); }
+        out << ").\n";
+        out << "Roundtripped: '" << dummy.u8string() << "'\n";
     }
 }  // namespace app
 
