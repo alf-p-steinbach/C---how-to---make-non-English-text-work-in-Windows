@@ -13,6 +13,7 @@ namespace app {
 
     void run()
     {
+        system( "chcp 65001 >nul" );
         static_assert( literals_are_utf8(), "Use the compiler option(s) for UTF-8 literals." );
         assert( os_api_is_utf8() or !"In Windows use a manifest for UTF-8 as ANSI codepage." );
 
@@ -40,19 +41,4 @@ namespace app {
     }
 }  // namespace app
 
-#include <stdlib.h>     // system, EXIT_...
-#include <stdexcept>
-using   cppm::in_;
-using   std::cerr, std::exception;
-
-auto main() -> int
-{
-    system( "chcp 65001 >nul" );
-    try {
-        app::run();
-        return EXIT_SUCCESS;
-    } catch( in_<exception> x ) {
-        cerr << "!" << x.what() << "\n";
-    }
-    return EXIT_FAILURE;
-}
+auto main() -> int { return cppm::with_exceptions_displayed( app::run ); }
