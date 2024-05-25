@@ -1,0 +1,5 @@
+#ifdef _WIN32
+#   include "cppm.for-windows.cpp-include"
+#else
+#   include "cppm.generic.cpp-include"
+#endif

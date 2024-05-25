@@ -6,7 +6,7 @@ namespace winapi {
         -> bool
     { return (GetACP() == 65001); }
 
-    inline auto winapi_h_assert_utf8_codepage()
+    inline auto assert_utf8_codepage()
         -> bool
     {
         assert( is_utf8_codepage() or !"The process codepage isn't UTF-8 (old Windows?)." );

@@ -7,7 +7,6 @@
 #include <fstream>
 #include <string>
 
-
 namespace app {
     namespace fs = std::filesystem;
     using namespace cppm::now_and_fail;
@@ -16,7 +15,8 @@ namespace app {
     using   std::ifstream,                  // <fstream>
             std::getline, std::string;      // <string>
 
-    //! Bug: per the standard the default `.string()` produces system Windows ANSI encoding.
+    //! Bug: per the standard the default `.string()` produces system Windows ANSI encoding
+    //  in Windows, and this is so with MinGW g++ 11.2.
     auto operator-( in_<fs::path> p ) -> string { return p.string(); }  // `-`: stripped.
 
     void run()
@@ -24,7 +24,8 @@ namespace app {
         static_assert( literals_are_utf8(), "Use the compiler option(s) for UTF-8 literals." );
         assert( os_api_is_utf8() or !"In Windows use a manifest for UTF-8 as ANSI codepage." );
 
-        //! Bug: the `fs::path` constructor assumes a `char`-based string is system Windows ANSI.
+        //! Bug: per the standard the `fs::path` constructor assumes a `char`-based string is
+        //  system Windows ANSI encoded in Windows, and this is so with MinGW g++ 11.2.
         const auto poem_path = fs::path( "data/æøå-poem.txt" );
         ifstream poem( poem_path );
         now( not poem.fail() ) or fail( "Failed to open file “{}”.", -poem_path );
