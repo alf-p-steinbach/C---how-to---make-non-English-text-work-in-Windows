@@ -173,7 +173,7 @@ A small [test program](apps/report_encodings/report_encodings.cpp) with all of t
 | Visual C++ version 19.35.32215 for x64 | the process ANSI codepage, from `GetACP` | UTF-8 ✅ |
 | MinGW g++ version 11.2.0 for x64 | the system ANSI codepage e.g. from `GetLocaleInfo` | E.g. cp 1252 ❌ |
 
-Which means that with MinGW g++ 11.2.0 `fs::path` garbles a `char`-based path specification with non-ASCII characters, as the standard (apparently) requires.
+Which means that [with MinGW g++ 11.2.0 `fs::path` garbles](code/æøå-poem.naive.cpp) a `char`-based path specification with non-ASCII characters, as the standard (apparently) requires.
 
 *TANSTAAFL*: *There Ain’t No Such Thing As A Free Lunch*.
 
