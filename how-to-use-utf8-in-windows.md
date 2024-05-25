@@ -54,6 +54,40 @@ As of 2024 this option is not yet supported by Visual Studio’s project propert
 
 I believe but do not know that the same needs to be done for clang++ in Windows, because in Windows it’s positioned itself roughly as a replacement for Visual C++.
 
+You can use the following code to test your setup:
+
+[*hello.cpp*](code/hello.cpp):
+
+```cpp
+#include <cstdlib>          // system
+#include <iostream>         // cout, endl
+
+namespace cppm {
+    using Byte = unsigned char;
+    constexpr auto& oe = "ø";
+
+    constexpr auto literals_are_utf8()
+        -> bool
+    { return (Byte( oe[0] ) == 195 and Byte( oe[1] ) == 184 ); }
+
+    static_assert( literals_are_utf8(), "To get UTF-8 literals with MSVC use option /utf-8." );
+}  // namespace cppm
+
+namespace app{
+    using std::system, std::cout, std::endl;
+
+    void run()
+    {
+        #ifdef _WIN32
+            system( "chcp 65001 >nul" );    // UTF-8
+        #endif
+        cout << "Proper Norwegian blåbærsyltetøy! Yay!" << endl;
+    }
+}  // namespace app
+
+auto main() -> int { app::run(); }
+```
+
 
 ### 2. *How* to format fixed width fields (regardless of Windows/\*nix/whatever platform).
 
