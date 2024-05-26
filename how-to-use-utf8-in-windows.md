@@ -196,9 +196,19 @@ By so far taking charge of &mdash; or alternatively working around &mdash; 5 tex
 
 For example, the declaration `ifstream f( "æøå-poem.txt" );` now works.
 
-This obviates the need for using `std::filesystem::path` to work around the Windows text encoding issues, which was the main rationale for its original incarnation in Boost, but its functionality for assembling paths from parts and inspecting the parts of a path is one reason to still use it (convenience), and the distinction it makes between general string and filesystem path is another reason (correctness, clarity).
+This obviates the need for using `std::filesystem::path` to work around the Windows text encoding issues, which was the main rationale for its original incarnation in Boost, but there are still reasons to use it including
 
-However, a cost, a price paid for the “all UTF-8” environment, is that the C++17 declaration `ifstream f( fs::path( "æøå-poem.txt" ) );`, where `fs` is an alias for `std::filesystem`, is no longer guaranteed to work&hellip; And as I read the standard it’s formally guaranteed to *not* work unless Windows has been configured to use UTF-8 globally (a beta feature as I write this). Because: `fs::path` incorrectly expects the `char`-based text to be encoded with the **global Windows ANSI** encoding instead of the **process Windows ANSI** encoding.
+* its functionality for assembling paths from parts;
+* its functionality for inspecting the parts of a path; and
+* the distinction it makes between general string and filesystem path (correctness, clarity).
+
+However, a cost, a price paid for the “all UTF-8” environment, is that the C++17 declaration
+
+```cpp
+ifstream f( fs::path( "æøå-poem.txt" ) );
+```
+
+&hellip; where `fs` is an alias for `std::filesystem`, is no longer guaranteed to work&hellip; And as I read the standard it’s formally guaranteed to *not* work unless Windows has been configured to use UTF-8 globally (a beta feature as I write this). Because: `fs::path` incorrectly expects the `char`-based text to be encoded with the **global Windows ANSI** encoding instead of the **process Windows ANSI** encoding.
 
 A small [test program](apps/report_encodings/report_encodings.cpp) with all of the measures (1) through (5) in place, reported:
 
