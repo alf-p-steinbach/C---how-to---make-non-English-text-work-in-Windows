@@ -20,6 +20,7 @@ namespace cppm::utf8 {
                 assert( literals_are_utf8() or !"Use the compiler option(s) for UTF-8 literals." ),
                 0
                 );
+            (void) dummy;
         }
     }  // namespace encoding_assumption_checking
 }  // namespace cppm::utf8

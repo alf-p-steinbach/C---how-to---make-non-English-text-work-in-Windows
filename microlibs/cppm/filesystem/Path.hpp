@@ -9,29 +9,28 @@
 
 namespace cppm {
     namespace sfs = std::filesystem;
+    using   std::string,            // <string>
+            std::string_view;       // <string_view>
+
+    #if __cplusplus >= 202002
+        using   std::u8string,          // <string>
+                std::u8string_view;     // <string_view>
+    #endif
 
     namespace stdlib_workarounds {
-        using   std::string,            // <string>
-                std::string_view;       // <string_view>
-
-        #if __cplusplus >= 202002
-            using   std::u8string,          // <string>
-                    std::u8string_view;     // <string_view>
-        #endif
-
         inline auto path_from_u8( in_<string_view> spec )
-            -> fsf::path
+            -> sfs::path
         {
             globally_once_assert_utf8_literals();
             #if __cplusplus <= 202002   // `<=` b/c `u8path` still exists in C++20, as deprecated.
-                return fsf::u8path( spec );
+                return sfs::u8path( spec );
             #else
                 using U8 = const char8_t;   // `char8_t` is a distinct type in C++20 and later.
-                return fsf::path( u8string_view( reinterpret_cast<U8*>( spec.data() ), s.size() );
+                return sfs::path( u8string_view( reinterpret_cast<U8*>( spec.data() ), s.size() );
             #endif 
         }
 
-        inline to_u8_string( in_<sfs::path> p )
+        inline auto to_u8_string( in_<sfs::path> p )
             -> string
         {
             globally_once_assert_utf8_literals();
@@ -42,20 +41,24 @@ namespace cppm {
                 return string( s.begin(), s.end() );    // Needless copy except for C++20 nonsense.
             #endif 
         }
+
     }  // namespace stdlib_workarounds
 
     inline namespace filesystem {
-        class Path:
-            private fsf::path
+        class Path_base: protected sfs::path { public: using sfs::path::path; };
+
+        class Path: Path_base
         {
-            using Base = fsf::path;
+            using Base = Path_base;
+
         public:
             Path( in_<string_view> spec ):
                 Base( stdlib_workarounds::path_from_u8( spec ) )
             {}
 
-            auto str() const -> string { return stdlib_workarounds::to_string( *this ); }
-            auto operator string () const { return str(); }
+            auto str() const -> std::string { return stdlib_workarounds::to_u8_string( *this ); }
+            operator std::string () const { return str(); }
+            auto operator-() const -> std::string { return str(); }
         };
     }  // pseudo-inline namespace filesystem
 }  // namespace cppm
