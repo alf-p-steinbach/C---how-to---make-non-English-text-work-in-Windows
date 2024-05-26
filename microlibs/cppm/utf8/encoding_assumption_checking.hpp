@@ -4,9 +4,9 @@
 #include <assert.h>
 
 namespace cppm::utf8 {
-    inline namespace encoding_assumption_checking {
-        static constexpr auto& oe = "ø";
+    static constexpr auto& oe = "ø";
 
+    inline namespace encoding_assumption_checking {
         constexpr auto literals_are_utf8()
             -> bool
         { return (Byte( oe[0] ) == 195 and Byte( oe[1] ) == 184 ); }

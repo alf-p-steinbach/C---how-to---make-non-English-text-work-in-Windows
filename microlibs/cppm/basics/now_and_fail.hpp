@@ -12,7 +12,9 @@ namespace cppm {
             std::string_view;           // <string>
 
     inline namespace now_and_fail {
-        constexpr auto now( const bool condition ) noexcept -> bool { return condition; }
+        constexpr auto now( const bool condition ) noexcept
+            -> bool
+        { return condition; }
 
         template< class... Args >
         [[noreturn]]
