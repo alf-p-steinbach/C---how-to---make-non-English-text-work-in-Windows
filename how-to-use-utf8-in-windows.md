@@ -132,7 +132,7 @@ For, the problem is not Windows or Windows consoles, but merely low Quality of I
 
 ### 4. *How* to get the `main` arguments UTF-8 encoded.
 
-In Windows the `main` arguments `argv` are the original UTF-16 encoded command line arguments (which can be obtained via `GetCommandLine()` + `CommandLineToArgvW()`) translated to the process’ Windows ANSI encoding (the result of `GetACP()`). And by default `GetACP()` returns Windows’ global Windows ANSI encoding, in Western countries usually codepage 1252 = Windows ANSI Western, which is a single byte per character Latin-1 extension. So by  default this is a **lossy conversion** where e.g. filenames specified as command line arguments, can be irrevocably trashed.
+In Windows the `main` arguments `argv` are the original UTF-16 encoded command line arguments (which can be obtained via `GetCommandLine()` + `CommandLineToArgvW()`) translated to the process’ Windows ANSI encoding (the result of `GetACP()`). And by default `GetACP()` returns Windows’ system Windows ANSI encoding, in Western countries usually codepage 1252 = Windows ANSI Western, which is a single byte per character Latin-1 extension. So by  default this is a **lossy conversion** where e.g. filenames specified as command line arguments, can be irrevocably trashed.
 
 The AFAIK only way to make `GetACP` return the UTF-8 encoding, codepage 65001, so that the `main` arguments get UTF-8 encoded, is (this works since June 2019) to [equip the executable with a suitable **manifest** resource](https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page#set-a-process-code-page-to-utf-8).
 
@@ -208,7 +208,7 @@ However, a cost, a price paid for the “all UTF-8” environment, is that the C
 ifstream f( fs::path( "æøå-poem.txt" ) );
 ```
 
-&hellip; where `fs` is an alias for `std::filesystem`, is no longer guaranteed to work&hellip; And as I read the standard it’s formally guaranteed to *not* work unless Windows has been configured to use UTF-8 globally (a beta feature as I write this). Because: `fs::path` incorrectly expects the `char`-based text to be encoded with the **global Windows ANSI** encoding instead of the **process Windows ANSI** encoding.
+&hellip; where `fs` is an alias for `std::filesystem`, is no longer guaranteed to work&hellip; And as I read the standard it’s formally guaranteed to *not* work unless Windows has been configured to use UTF-8 globally (a beta feature as I write this). Because: `fs::path` incorrectly expects the `char`-based text to be encoded with the **system Windows ANSI** encoding instead of the **process Windows ANSI** encoding.
 
 A small [test program](apps/report_encodings/report_encodings.cpp) with all of the measures (1) through (5) in place, reported:
 
