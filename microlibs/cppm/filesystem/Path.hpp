@@ -41,24 +41,23 @@ namespace cppm {
                 return string( s.begin(), s.end() );    // Needless copy except for C++20 nonsense.
             #endif 
         }
-
     }  // namespace stdlib_workarounds
 
     inline namespace filesystem {
-        class Path_base: protected sfs::path { public: using sfs::path::path; };
-
-        class Path: Path_base
+        class Path
         {
-            using Base = Path_base;
+            sfs::path   m_path;
 
         public:
             Path( in_<string_view> spec ):
-                Base( stdlib_workarounds::path_from_u8( spec ) )
+                m_path( stdlib_workarounds::path_from_u8( spec ) )
             {}
 
-            auto str() const -> std::string { return stdlib_workarounds::to_u8_string( *this ); }
-            operator std::string () const { return str(); }
-            auto operator-() const -> std::string { return str(); }
+            auto str() const -> string { return stdlib_workarounds::to_u8_string( m_path ); }
+            operator string () const { return str(); }      // File open & formatting support.
+            auto operator-() const -> string { return str(); }          // Reduction to string.
         };
+
+        inline auto format_as( in_<Path> p ) -> string { return p.str(); }   // Doesn't work. :(
     }  // pseudo-inline namespace filesystem
 }  // namespace cppm

@@ -4,7 +4,7 @@ if "%1"=="" (
     echo !Usage: %~n0 CPPFILENAME 1>&2
     exit /b 1
 )
-set CPPFILE=%1
+set CPPFILE="%1"
 if not exist %CPPFILE% (
     echo !No %CPPFILE% file in the current directory. 1>&2
     exit /b 1
