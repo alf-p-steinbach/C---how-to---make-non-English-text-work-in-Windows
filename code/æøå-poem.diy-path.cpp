@@ -1,4 +1,6 @@
 // Using a DIY `std::filesystem::path` wrapper that corrects its text garbling.
+#include "minimal-Path.hpp"
+
 #include <cppm.hpp>
 #include <fmt/core.h>
 
@@ -8,8 +10,9 @@
 
 namespace app {
     using namespace cppm::now_and_fail;
-    using   cppm::os_api_is_utf8, cppm::in_, cppm::Path;
+    using   cppm::os_api_is_utf8, cppm::in_;
     using   fmt::print;                     // <fmt/core.h>
+    using   minimal::Path;
     using   std::ifstream,                  // <fstream>
             std::getline, std::string;      // <string>
 
@@ -19,11 +22,11 @@ namespace app {
 
         assert( os_api_is_utf8() or !"In Windows use a manifest for UTF-8 as ANSI codepage." );
         ifstream poem( poem_path );
-        now( not poem.fail() ) or fail( "Failed to open file “{}”.", poem_path );
+        now( not poem.fail() ) or fail( "Failed to open file “{}”.", -poem_path );
 
         for( string line; getline( poem, line ); ) { print( "{}\n", line ); }
 
-        now( poem.eof() ) or fail( "Something failed reading file “{}”.", poem_path );
+        now( poem.eof() ) or fail( "Something failed reading file “{}”.", -poem_path );
     }
 }  // namespace app
 

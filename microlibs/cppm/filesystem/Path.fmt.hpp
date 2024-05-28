@@ -4,10 +4,9 @@
 #include <fmt/core.h>
 #include <fmt/format.h>         // fmt::formatter<T>::format
 
-#include <string_view>
-
 template<>
-struct fmt::formatter<cppm::filesystem::Path>: formatter<std::string>
+struct fmt::formatter<cppm::filesystem::Path>:
+    formatter<std::string>
 {
     // parse is inherited from `formatter<string>`.
 
