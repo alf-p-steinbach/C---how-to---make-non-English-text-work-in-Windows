@@ -22,11 +22,11 @@ namespace cppm {
             -> fs::path
         {
             globally_once_assert_utf8_literals();
-            #if __cplusplus <= 202002   // `<=` b/c `u8path` still exists in C++20, as deprecated.
+            #if __cplusplus < 202002    // `<` b/c `u8path` is deprecated in C++20; ⇨ warnings. 
                 return fs::u8path( spec );
             #else
                 using U8 = const char8_t;   // `char8_t` is a distinct type in C++20 and later.
-                return fs::path( u8string_view( reinterpret_cast<U8*>( spec.data() ), s.size() );
+                return fs::path( u8string_view( reinterpret_cast<U8*>( spec.data() ), spec.size() ) );
             #endif 
         }
 
