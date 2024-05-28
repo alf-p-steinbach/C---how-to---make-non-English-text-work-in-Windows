@@ -15,7 +15,7 @@ international characters in filesystem paths, or in environment variables, or in
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [1. *How* to display non-English characters in the console.](#1-how-to-display-non-english-characters-in-the-console)
-- [2. *How* to format fixed width fields (regardless of Windows/\*nix/whatever platform).](#2-how-to-format-fixed-width-fields-regardless-of-windows%5Cnixwhatever-platform)
+- [2. *How* to format fixed width fields (regardless of Windows/*nix/whatever platform).](#2-how-to-format-fixed-width-fields-regardless-of-windowsnixwhatever-platform)
 - [3. *How* to input non-English characters from the console.](#3-how-to-input-non-english-characters-from-the-console)
 - [4. *How* to get the `main` arguments UTF-8 encoded.](#4-how-to-get-the-main-arguments-utf-8-encoded)
 - [5. *How* to make `std::filesystem::path` (do the) work.](#5-how-to-make-stdfilesystempath-do-the-work)
@@ -93,7 +93,7 @@ auto main() -> int { app::run(); }
 ```
 
 
-### 2. *How* to format fixed width fields (regardless of Windows/\*nix/whatever platform).
+### 2. *How* to format fixed width fields (regardless of Windows/*nix/whatever platform).
 
 There is no good way to make fixed width field ***formatting*** with `std::setw` work, because it has an assumption of 1 byte = 1 character, which doesn’t hold with UTF-8 (assumptions, again). The same goes for `printf` and family. And likely for DIY solutions.
 
