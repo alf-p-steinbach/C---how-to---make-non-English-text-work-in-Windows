@@ -32,7 +32,11 @@ To make ordinary output via e.g. `cout` work in Windows you need to take control
 3.    The encoding the compiler uses to store `char` based literals.
 4.    The encoding the console assumes for a program’s byte stream output.
 
-The simplest is to set all these to UTF-8. With the g++ compiler (2) and (3) are already UTF-8 by default, so with g++ you only need to fix (4), the console’s encoding assumption. Which you can do via a code snippet such as
+The simplest is to set all these to UTF-8.
+
+Taking care of (1), the source code’s encoding, depends on the editor you use. The editor’s functionality for that can be available via its “save as” dialog (Visual Studio), or e.g. as a conversion choice in the menus (Notepad++), or e.g. sort of hidden behind an encoding name in the status bar (Visual Studio Code). Anyway, don’t forget to do it!
+
+With the g++ compiler (2) and (3) are already UTF-8 by default, so with g++ you only need to fix (4), the console’s encoding assumption, which you can do via a code snippet such as
 
 ```cpp
 #ifdef _WIN32
