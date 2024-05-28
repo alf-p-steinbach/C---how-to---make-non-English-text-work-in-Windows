@@ -198,9 +198,9 @@ For example, the declaration `ifstream f( "æøå-poem.txt" );` now works.
 
 This obviates the need for using `std::filesystem::path` to work around the Windows text encoding issues, which was the main rationale for its original incarnation in Boost, but there are still reasons to use it including
 
-* its functionality for assembling paths from parts;
-* its functionality for inspecting the parts of a path; and
-* the distinction it makes between general string and filesystem path (correctness, clarity).
+* its functionality for assembling paths from parts, convenient though neither all reasonable nor complete;
+* its functionality for inspecting the parts of a path (ditto qualifications); and, most important,
+* the distinction it makes between general string and filesystem path, supporting correctness and clarity.
 
 However, a cost, a price paid for the “all UTF-8” environment, is that the C++17 declaration
 
@@ -242,5 +242,177 @@ Another reason to use a wrapper or distinct `Path` class: on top of the required
 
 ---
 
+To define a wrapper `Path` one needs functionality that works the same in C++17 and C++20 to
 
+* convert from UTF-8 `char` based string to `fs::path`; and
+* convert from `fs::path` to UTF-8 `char` based string,
 
+&hellip; e.g. like this:
+
+[*cppm/stdlib_workaround/fs_path.hpp*](microlibs/cppm/stdlib_workarounds/fs_path.hpp):
+
+```cpp
+#pragma once
+
+#include <cppm/basics/type_makers.hpp>                      // in_
+#include <cppm/utf8/encoding_assumption_checking.hpp>       // globally_once_assert_utf8_literals
+
+#include <filesystem>
+#include <string>
+#include <string_view>
+
+namespace cppm {
+    namespace fs = std::filesystem;
+    using   std::string,            // <string>
+            std::string_view;       // <string_view>
+
+    #if __cplusplus >= 202002
+        using   std::u8string,          // <string>
+                std::u8string_view;     // <string_view>
+    #endif
+
+    inline namespace stdlib_workarounds {
+        inline auto path_from_u8( in_<string_view> spec )
+            -> fs::path
+        {
+            globally_once_assert_utf8_literals();
+            #if __cplusplus < 202002    // `<` b/c `u8path` is deprecated in C++20; ⇨ warnings. 
+                return fs::u8path( spec );
+            #else
+                using U8 = const char8_t;   // `char8_t` is a distinct type in C++20 and later.
+                return fs::path( u8string_view( reinterpret_cast<U8*>( spec.data() ), spec.size() ) );
+            #endif 
+        }
+
+        inline auto to_u8_string( in_<fs::path> p )
+            -> string
+        {
+            globally_once_assert_utf8_literals();
+            #if __cplusplus < 202002
+                return p.u8string();                    // Returns a `std::string` in C++17.
+            #else
+                const std::u8string s = p.u8string();
+                return string( s.begin(), s.end() );    // Needless copy except for C++20 nonsense.
+            #endif 
+        }
+    }  // inline namespace stdlib_workarounds
+}  // namespace cppm
+```
+
+There are then three basic implementation strategies for a wrapper `Path` class:
+
+* *public inheritance* of `fs::path`, ungood  
+  because that would expose for inadvertent use all the machinery that garbles text;
+* *private inheritance* of `fs::path`, ungood  
+  because in Windows that exposes a private implicit conversion to `std::wstring`, which makes the Visual C++ implementation of `std::istream` constructors ambiguous (C++ overload resolution is done before access checking); or
+* an `fs::path` as a *private data member*, technically OK  
+  but means that one needs to at least write wrapper functions for all desired operations.
+
+The alternative, to write a proper `Path` class from scratch, has certain advantages in that it can support e.g. Windows’ notation for accessing internal streams in a file, like “poem.txt:copyright”, but here I show just how to do a *minimal* `Path` wrapper &mdash; necessarily with an `fs::path` as data member:
+
+[*minimal-Path.hpp*](code/minimal-Path.hpp)
+
+```cpp
+#pragma once
+#include <cppm/stdlib_workarounds/fs_path.hpp>
+#include <cppm/basics/type_makers.hpp>                      // in_
+
+#include <filesystem>
+#include <string>
+#include <string_view>
+
+namespace minimal {
+    namespace fs = std::filesystem;
+    namespace stdlib_workarounds = cppm::stdlib_workarounds;
+    using   cppm::in_;
+    using   std::string,            // <string>
+            std::string_view;       // <string_view>
+
+    class Path
+    {
+        fs::path    m_path;
+
+    public:
+        Path( in_<string_view> spec ):
+            m_path( stdlib_workarounds::path_from_u8( spec ) )  // Also asserts UTF-8 literals.
+        {}
+
+        auto str() const -> string { return stdlib_workarounds::to_u8_string( m_path ); }
+        operator string () const { return str(); }      // File open & formatting support.
+        auto operator-() const -> string { return str(); }          // Reduction to string.
+    };
+}  // namespace minimal
+```
+
+The `-` operator is provided as a concise notation to obtain a `std::string`, e.g. for passing to `fmt::print`.
+
+At one time supporting *implicit* conversion for that was as easy as writing a free-standing `format_as` function, but that didn’t work with my testing with the current {fmt} library. Defining a [specialization of `fmt::formatter`](microlibs/cppm/filesystem/Path.fmt.hpp) does work, but is more than a single line of code.
+
+Usage of the above `minimal::Path` can go like this:
+
+[*æøå-poem.diy-path.cpp*](code/æøå-poem.diy-path.cpp):
+
+```cpp
+// Using a DIY `std::filesystem::path` wrapper that corrects its text garbling.
+#include "minimal-Path.hpp"
+
+#include <cppm.hpp>
+#include <fmt/core.h>
+
+#include <assert.h>
+#include <fstream>
+#include <string>
+
+namespace app {
+    using namespace cppm::now_and_fail;
+    using   cppm::os_api_is_utf8, cppm::in_;
+    using   fmt::print;                     // <fmt/core.h>
+    using   minimal::Path;
+    using   std::ifstream,                  // <fstream>
+            std::getline, std::string;      // <string>
+
+    void run()
+    {
+        const auto poem_path = Path( "data/æøå-poem.txt" );     // Asserts UTF-8 literals.
+
+        assert( os_api_is_utf8() or !"In Windows use a manifest for UTF-8 as ANSI codepage." );
+        ifstream poem( poem_path );
+        now( not poem.fail() ) or fail( "Failed to open file “{}”.", -poem_path );
+
+        for( string line; getline( poem, line ); ) { print( "{}\n", line ); }
+
+        now( poem.eof() ) or fail( "Something failed reading file “{}”.", -poem_path );
+    }
+}  // namespace app
+
+auto main() -> int { return cppm::with_exceptions_displayed( app::run ); }
+```
+
+Result when the current directory is such that the program finds the poem file:
+
+<img align="right" src="images/1280px-Hovering_bird.jpg" width="66%"/>
+
+```text
+«Einsamflygar» av Halldis Moren Vesaas
+--------------------------------------
+
+Barn, ikkje le av den fuglen
+som flaksar så hjelpelaust av stad.
+Vinden har skilt han frå dei andre
+som flyg over havet i ei jamn, tett rad.
+
+Vinden valde ut denne eine
+og kasta han ut av den usynlege lei
+som fuglar av hans slag plar følje.
+Han er ikkje lenger ein av dei.
+
+Sin eigen veg han må finne,
+eller – om han trøytnar om litt –
+gi tapt, la seg falle, gå under,
+slik går det desse einsame tidt.
+
+Det mørknar vidt over havet.
+Ei frostnatt kvesser sine jarn.
+Ein fugl flyr einsam under stjerner.
+Ikkje gråt for denne fuglen, barn.
+```
