@@ -25,4 +25,4 @@ namespace cppm::utf8 {
     }  // namespace encoding_assumption_checking
 }  // namespace cppm::utf8
 
-namespace cppm{ using namespace utf8::encoding_assumption_checking; };
+namespace cppm{ using namespace utf8::encoding_assumption_checking; }

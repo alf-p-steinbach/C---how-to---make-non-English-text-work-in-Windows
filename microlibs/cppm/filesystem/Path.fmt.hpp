@@ -10,7 +10,7 @@ struct fmt::formatter<cppm::filesystem::Path>:
 {
     // parse is inherited from `formatter<string>`.
 
-    auto format( const cppm::filesystem::Path& p, format_context& ctx ) const
+    auto format( const cppm::filesystem::Path& p, format_context& ctx )
         -> auto
     { return formatter<std::string>::format( p.str(), ctx ); }
 };
