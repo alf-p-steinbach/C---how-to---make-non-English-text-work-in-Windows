@@ -5,12 +5,10 @@
 
 #include <stdexcept>
 #include <string_view>
-#include <string>
 
 namespace cppm {
     using   std::runtime_error,         // <stdexcept>
-            std::string_view,           // <string_view>
-            std::string;                // <string>
+            std::string_view;           // <string_view>
 
     inline namespace now_and_fail {
         constexpr auto now( const bool condition ) noexcept
@@ -22,7 +20,7 @@ namespace cppm {
         inline auto fail( in_<string_view> s, in_<Args>... args )
             -> bool
         {
-            const fmt::format_args vargs = fmt::make_format_args( +args... );
+            const fmt::format_args vargs = fmt::make_format_args( args... );
             throw runtime_error( fmt::vformat( s, vargs ) );   // Note: avoid ADL.
             for( ;; ) {}        // Should never get here. Also, avoid g++ silly-warning.
         }
