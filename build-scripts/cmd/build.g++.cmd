@@ -21,3 +21,4 @@ set MICROLIBS="%~dp0..\microlibs"
 g++ %STDCPP% -s -I %MICROLIBS% -D FMT_HEADER_ONLY -D UTF8_WINAPI ^
     %CPPFILE% cppm.cpp ^
     app-manifest.o
+
