@@ -1,0 +1,36 @@
+#!/usr/bin/bash
+CPPFILE="$1"
+if [[ -z "${CPPFILE}" ]]; then
+    echo !Usage: $0 CPPFILENAME 1>&2
+    exit 1
+fi
+
+if ! [ -f "$CPPFILE" ]; then
+    echo !No $CPPFILE file in the current directory. 1>&2
+    exit 1
+fi
+
+SCRIPT_DIR=$( pushd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd && popd &> /dev/null)
+MICROLIBS_DIR=`realpath -q "$SCRIPT_DIR/../../../microlibs"`
+MINGW_BIN_DIR=$( pushd -- "$( dirname -- "$( which windres )" )" &> /dev/null && pwd && popd &> /dev/null)
+
+# echo "SCRIPT_DIR    = $SCRIPT_DIR"
+# echo "MICROLIBS_DIR = $MICROLIBS_DIR"
+# echo "MINGW_BIN_DIR = $MINGW_BIN_DIR"
+
+case "$MINGW_BIN_DIR" in
+    *' '*)
+        echo "!The MinGW directory path contains a space; \`git-bash\` for Windows doesn’t like that." >&2
+        # One workaround is to define a logical drive via Cmd, like "subst m: THE-MINGW-PATH", and
+        # add the "bin" subdirectory on/in that logical drive, "/m/bin", to the front of the PATH.
+        exit 1
+        ;;
+esac
+
+echo "Generating binary resource..."
+windres -i ./app-manifest.rc -o ./app-manifest.o  || exit 1
+
+echo "Compiling and linking..."
+# The '-D UTF8_WINAPI' is used by the cppm implementation for Windows.
+STDCPP="-std=c++17 -pedantic-errors -Wall -Wextra"
+g++ $STDCPP -s -I "$MICROLIBS_DIR" -D FMT_HEADER_ONLY -D UTF8_WINAPI "$CPPFILE" cppm.cpp app-manifest.o -oa

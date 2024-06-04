@@ -11,8 +11,7 @@ if ! [ -f "$CPPFILE" ]; then
 fi
 
 SCRIPT_DIR=$( pushd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd && popd &> /dev/null)
-MICROLIBS_DIR=`realpath -q "$SCRIPT_DIR/../../microlibs"`
+MICROLIBS_DIR=`realpath -q "$SCRIPT_DIR/../../../microlibs"`
 
 STDCPP="-std=c++17 -pedantic-errors -Wall -Wextra"
 g++ $STDCPP -s -I"$MICROLIBS_DIR" -D FMT_HEADER_ONLY "$CPPFILE" cppm.cpp -oa
-

@@ -14,11 +14,12 @@ if not defined CPATH (
     exit /b 1
 )
 
+echo Generating binary resource...
 windres -i app-manifest.rc -o app-manifest.o
 
-set STDCPP=-std=c++17 -pedantic-errors -Wall -Wextra
-set MICROLIBS="%~dp0..\microlibs"
+echo Compiling and linking...
+set STDCPP=-std=c++20 -pedantic-errors -Wall -Wextra
+set MICROLIBS="%~dp0..\..\..\microlibs"
 g++ %STDCPP% -s -I %MICROLIBS% -D FMT_HEADER_ONLY -D UTF8_WINAPI ^
     %CPPFILE% cppm.cpp ^
     app-manifest.o
-
