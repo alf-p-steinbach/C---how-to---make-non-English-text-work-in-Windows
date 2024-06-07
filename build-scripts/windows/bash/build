@@ -1,7 +1,13 @@
 #!/usr/bin/bash
+#
+# “Tested” with git-bash and MSYS2 bash.
+#
+# Note: with MinGW g++ 14.1.0 use option `-Wno-dangling-reference` for the {fmt} library code, or
+# somehow make g++ treat that code as a system header (not sure why it doesn’t, it’s anyway a bug).
+
 CPPFILE="$1"
 if [[ -z "${CPPFILE}" ]]; then
-    echo !Usage: $0 CPPFILENAME 1>&2
+    echo !Usage: $0 CPPFILENAME [COMPILER_OPTIONS]1>&2
     exit 1
 fi
 
@@ -9,6 +15,9 @@ if ! [ -f "$CPPFILE" ]; then
     echo !No $CPPFILE file in the current directory. 1>&2
     exit 1
 fi
+
+shift
+COMPILER_OPTIONS="$@"
 
 SCRIPT_DIR=$( pushd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd && popd &> /dev/null)
 MICROLIBS_DIR=`realpath -q "$SCRIPT_DIR/../../../microlibs"`
@@ -20,8 +29,8 @@ MINGW_BIN_DIR=$( pushd -- "$( dirname -- "$( which windres )" )" &> /dev/null &&
 
 case "$MINGW_BIN_DIR" in
     *' '*)
-        echo "!The MinGW directory path contains a space; \`git-bash\` for Windows doesn’t like that." >&2
-        # One workaround is to define a logical drive via Cmd, like "subst m: THE-MINGW-PATH", and
+        echo "!The MinGW directory path contains a space; e.g. \`git-bash\` for Windows doesn’t like that." >&2
+        # One workaround is to define a logical drive via e.g. "subst m: THE-MINGW-PATH", and
         # add the "bin" subdirectory on/in that logical drive, "/m/bin", to the front of the PATH.
         exit 1
         ;;
@@ -33,4 +42,5 @@ windres -i ./app-manifest.rc -o ./app-manifest.o  || exit 1
 echo "Compiling and linking..."
 # The '-D UTF8_WINAPI' is used by the cppm implementation for Windows.
 STDCPP="-std=c++17 -pedantic-errors -Wall -Wextra"
-g++ $STDCPP -s -I "$MICROLIBS_DIR" -D FMT_HEADER_ONLY -D UTF8_WINAPI "$CPPFILE" cppm.cpp app-manifest.o -oa
+g++ $STDCPP $COMPILER_OPTIONS -s -I "$MICROLIBS_DIR" -D FMT_HEADER_ONLY -D UTF8_WINAPI \
+    "$CPPFILE" cppm.cpp app-manifest.o -oa
