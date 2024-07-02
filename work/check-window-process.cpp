@@ -163,11 +163,14 @@ namespace winapi {
         return path.substr( i_first_char, i_last_period - i_first_char );
     }
 
+    auto console_kind()
+        -> wstring
+    { return modulename_for( process_id_for( find_console_window() ) ); }
 }  // namespace winapi
 
 #include <fmt/core.h>
 auto main() -> int
 {
     using namespace winapi;
-    fmt::print( "{:s}\n", u8_from( modulename_for( process_id_for( find_console_window() ) ) ) );
+    fmt::print( "{:s}\n", u8_from( console_kind() ) );
 }
