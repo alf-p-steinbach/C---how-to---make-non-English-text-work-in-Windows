@@ -149,11 +149,12 @@ namespace winapi {
                 path.resize( size );
                 break;
             }
-            if( GetLastError() == ERROR_INSUFFICIENT_BUFFER ) {
-                path.resize( 2*path.size() );
-            } else {
-                fail( "QueryFullProcessImageName failed to obtain exe name." );
-            }
+            const bool larger_buffer_may_fix_it = (
+                GetLastError() == ERROR_INSUFFICIENT_BUFFER and path.size() < 64*1024
+            );
+            now( larger_buffer_may_fix_it )
+                or fail( "QueryFullProcessImageName failed to obtain exe name." );
+            path.resize( 2*path.size() );
         }
         const size_t i_last_separator   = path.find_last_of( L'\\' );
         const size_t i_first_char       = i_last_separator + 1;
