@@ -163,14 +163,49 @@ namespace winapi {
         return path.substr( i_first_char, i_last_period - i_first_char );
     }
 
-    auto console_kind()
+    auto get_console_kind()
         -> wstring
     { return modulename_for( process_id_for( find_console_window() ) ); }
 }  // namespace winapi
 
 #include <fmt/core.h>
+#include <string_view>
+namespace app {
+    using   cppm::in_;
+    using   std::wstring,               // <string>
+            std::wstring_view;          // <string_view>
+
+    auto ascii_uppercased( in_<wstring_view> s )
+        -> wstring
+    {
+        wstring result;
+        for( const wchar_t ch: s ) { result += (L'a' <= ch and ch <= L'z'? ch - L'a' + L'A' : ch); }
+        return result;
+    }
+
+    void run()
+    {
+        using   winapi::get_console_kind, winapi::u8_from;
+
+        const wstring console_kind = get_console_kind();
+        fmt::print( "Console kind: “{:s}”.\n", u8_from( console_kind ) );
+        fmt::print( "It’s {}Windows Terminal.\n",
+            (ascii_uppercased( console_kind ) == L"WINDOWSTERMINAL"? "" : "NOT ")
+            );
+    }
+}
+
+#include <cstdlib>          // EXIT_...
 auto main() -> int
 {
-    using namespace winapi;
-    fmt::print( "{:s}\n", u8_from( console_kind() ) );
+    using cppm::in_;
+    using std::exception;
+
+    try {
+        app::run();
+        return EXIT_SUCCESS;
+    } catch( in_<exception> x ) {
+        fmt::print( stderr, "!{}\n", x.what() );
+    }
+    return EXIT_FAILURE;
 }
