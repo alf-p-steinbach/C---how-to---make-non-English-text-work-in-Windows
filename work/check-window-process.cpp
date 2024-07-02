@@ -87,10 +87,17 @@ namespace winapi {
     {
         const auto& uuid = L"42DDBEFE-C675-4358-8D48-F6FB05AB85A7";
         const wstring original_title = console_title();
+        set_console_title( uuid );
         const auto auto_restore = Scope_guard( [&]{ set_console_title( original_title ); } );
-        set_console_title( uuid ), Sleep( 40 );
-        const HWND window = FindWindow( nullptr, uuid );
-        now( window != 0 ) or fail( "FindWindow failed to find the console window" );
+
+        HWND window = 0;
+        for( int i = 1; i <= 5; ++i ) {
+            Sleep( 40 );
+            window = FindWindow( nullptr, uuid );
+            if( window != 0 ) { break; }
+        }
+        now( window != 0 ) or fail( "FindWindow failed to find the console window." );
+
         return window;
     }
 
@@ -114,11 +121,20 @@ namespace winapi {
         result.resize( result_length );         // Just for good measure.
         return result;
     }
+
+    auto process_id_for( const HWND window )
+        -> DWORD
+    {
+        DWORD result = 0;
+        const DWORD thread_id = GetWindowThreadProcessId( window, &result );
+        now( thread_id != 0 ) or fail( "GetWindowThreadProcessId failed" );
+        return result;
+    }
 }  // namespace winapi
 
 #include <fmt/core.h>
 auto main() -> int
 {
     using namespace winapi;
-    fmt::print( "{}\n", u8_from( console_title() ) );
+    fmt::print( "{:X}\n", uintptr_t( process_id_for( find_console_window() ) ) );
 }
