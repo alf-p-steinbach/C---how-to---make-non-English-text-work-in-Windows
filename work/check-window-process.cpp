@@ -130,11 +130,43 @@ namespace winapi {
         now( thread_id != 0 ) or fail( "GetWindowThreadProcessId failed" );
         return result;
     }
+
+    auto modulename_for( const DWORD process_id )
+        -> wstring
+    {
+        const HANDLE handle = OpenProcess(
+            READ_CONTROL | PROCESS_QUERY_LIMITED_INFORMATION, FALSE, process_id
+            );
+        now( handle != 0 ) or fail( "OpenProcess failed to create a process handle." );
+        const auto autoclose_the_handle = Scope_guard( [&]{ CloseHandle( handle ); } );
+
+        auto path = wstring( MAX_PATH, L'\0' );
+        for( ;; ) {
+            auto size = DWORD( path.size() );
+            SetLastError( 0 );
+            const bool success = QueryFullProcessImageName( handle, 0, path.data(), &size );
+            if( success ) {
+                path.resize( size );
+                break;
+            }
+            if( GetLastError() == ERROR_INSUFFICIENT_BUFFER ) {
+                path.resize( 2*path.size() );
+            } else {
+                fail( "QueryFullProcessImageName failed to obtain exe name." );
+            }
+        }
+        const size_t i_last_separator   = path.find_last_of( L'\\' );
+        const size_t i_first_char       = i_last_separator + 1;
+        const size_t i_last_period      = path.find_last_of( L'.' );
+        // TODO: assert things? In particular some doubt about whether a period is guaranteed.
+        return path.substr( i_first_char, i_last_period - i_first_char );
+    }
+
 }  // namespace winapi
 
 #include <fmt/core.h>
 auto main() -> int
 {
     using namespace winapi;
-    fmt::print( "{:X}\n", uintptr_t( process_id_for( find_console_window() ) ) );
+    fmt::print( "{:s}\n", u8_from( modulename_for( process_id_for( find_console_window() ) ) ) );
 }
