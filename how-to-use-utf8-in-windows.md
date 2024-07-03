@@ -46,7 +46,7 @@ With the g++ compiler (2) and (3) are already UTF-8 by default, so with g++ you 
 
 Here `_WIN32` is a macro that’s automatically defined in 32-bit and 64-bit Windows. When this is done via Windows API functions instead of a command it’s easy to restore the original encoding assumption. Anyway you can put this system specific code in a separate source file, by doing it in the initializer for some dummy object.
 
-But instead of changing the console’s expectation for byte stream output yourself, you can use e.g. [the {fmt} library](https://github.com/fmtlib/fmt)’s `fmt::print` for output, which if possible presents UTF-8 correctly. This functionality is also available as `std::print` in the C++23 standard library.
+But instead of changing the console’s expectation for byte stream output yourself, you can use e.g. [the {fmt} library](https://github.com/fmtlib/fmt)’s `fmt::print` for output, which if possible generally presents UTF-8 correctly.  Its estimate of Unicode character width is not yet 100%, e.g. as of this writing it incorrectly treats ❌ as just one console character cell wide, but it’s generally OK, ✅.Happily the `fmt::print` functionality is also available as `std::print` in the C++23 standard library &mdash; this is where C++ is headed, phasing out iostreams output.
 
 Other compilers than g++ won’t necessarily assume and use UTF-8 for respectively source code and literals. In particular Visual C++ by default assumes Windows ANSI for byte unit encoded source code (unless there is an UTF-8 BOM). The default encoding of `char` based literals, the default C++ **execution character set**, is also Windows ANSI by default, which means that it depends on which country you compile in (!). This behavior can be *masked* by the compiler effectively just blindly copying bytes from the source code into literals. With UTF-8 no-BOM-source code you then get UTF-8 encoded simple literals, but literals like `u8"Fælslig børsebråk...\n"` are garbled.
 
@@ -91,6 +91,8 @@ namespace app{
 
 auto main() -> int { app::run(); }
 ```
+
+**Tip**: while the classic Windows console windows are unable to present emojis like “😃” and other double-cell (apparently the Unicode terminology is “full-width”) Unicode characters, [Windows Terminal](https://github.com/microsoft/terminal) generally displays them just fine.
 
 
 ### 2. *How* to format fixed width fields (regardless of Windows/*nix/whatever platform).
