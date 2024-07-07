@@ -29,7 +29,7 @@ namespace cppm {
         {
         public:
             using impl::Scope_guard_base::Scope_guard_base;     // Inherit the constructor.
-            using impl::Scope_guard::dismiss;
+            using impl::Scope_guard_base::dismiss;
         };
     }  // inline namespace exception_handling
 }  // namespace cppm

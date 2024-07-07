@@ -61,6 +61,9 @@ namespace cppm {
     };
 }  // namespace cppm
 
+#include <fmt/core.h>   //! DBG
+// Known OK WT version is 1.20, May 2024.
+
 namespace winapi {
     using   cppm::in_, cppm::intsize_of,
             cppm::now, cppm::fail, cppm::Scope_guard;
@@ -169,6 +172,7 @@ namespace winapi {
                 or fail( "QueryFullProcessImageName failed to obtain exe name." );
             path.resize( 2*path.size() );
         }
+        fmt::print( stderr, "!path: '{}'\n", u8_from( path ) );
         const size_t i_last_separator   = path.find_last_of( L'\\' );
         assert( i_last_separator != path.npos );
         const size_t i_first_char       = i_last_separator + 1;
