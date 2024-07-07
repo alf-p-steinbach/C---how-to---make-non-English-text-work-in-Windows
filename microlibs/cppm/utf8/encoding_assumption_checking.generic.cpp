@@ -5,4 +5,3 @@ namespace cppm::utf8 {
         -> bool
     { return true; }
 }  // namespace cppm::utf8
-

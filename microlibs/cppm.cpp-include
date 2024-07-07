@@ -1,5 +1,10 @@
-#ifdef _WIN32
+#include <cppm/basics/environment/os.hpp>
+
+#if CPPM_OS_IS_WINDOWS
 #   include "cppm.for-windows.cpp-include"
+#elif CPPM_OS_IS_UNIX
+#   include "cppm.for-unix.cpp-include"
 #else
-#   include "cppm.generic.cpp-include"
+#   error "This operating system is not supported."
+#   include <stop-compilation>
 #endif
