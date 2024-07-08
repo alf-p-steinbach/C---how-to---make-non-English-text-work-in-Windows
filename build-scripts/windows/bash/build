@@ -40,7 +40,6 @@ echo "Generating binary resource..."
 windres -i ./app-manifest.rc -o ./app-manifest.o  || exit 1
 
 echo "Compiling and linking..."
-# The '-D UTF8_WINAPI' is used by the cppm implementation for Windows.
 STDCPP="-std=c++17 -pedantic-errors -Wall -Wextra"
-g++ $STDCPP $COMPILER_OPTIONS -s -I "$MICROLIBS_DIR" -D FMT_HEADER_ONLY -D UTF8_WINAPI \
+g++ $STDCPP $COMPILER_OPTIONS -s -I "$MICROLIBS_DIR" -D FMT_HEADER_ONLY \
     "$CPPFILE" cppm.cpp app-manifest.o -oa

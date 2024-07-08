@@ -12,6 +12,17 @@
 #   include <iso646.h>                  // Standard `and` etc. also with MSVC.
 #endif
 
+
+//----------------------------------------------- Convenience macros.
+//
+// The macros are usable in macro-land; constants would not be.
+
+#define IS_NARROW_WINAPI()      (sizeof(*GetCommandLine()) == 1)
+#define IS_WIDE_WINAPI()        (sizeof(*GetCommandLine()) > 1)
+
+
+//----------------------------------------------- Select UTF-8 xxxA or UTF-16 xxxW API.
+
 // UTF8_WINAPI is a custom macro for this file. UNICODE, _UNICODE and _MBCS are MS macros.
 #if defined( UTF8_WINAPI ) and defined( UNICODE )
 #   error "Inconsistent, both UNICODE (UTF-16) and UTF8_WINAPI (UTF-8) are defined."
@@ -31,28 +42,39 @@
 #undef UNICODE
 #undef _UNICODE
 #ifdef UTF8_WINAPI
-#   undef _MBCS
-#   define _MBCS        // Mainly for 3rd party code that uses it for platform detection.
+#   undef   _MBCS
+#   define  _MBCS       // Mainly for 3rd party code that uses it for platform detection.
 #else
 #   define UNICODE
 #   define _UNICODE     // Mainly for 3rd party code that uses it for platform detection.
 #endif
-#undef STRICT           // C++-compatible “strongly typed” declarations, please.
-#define STRICT
-#undef NOMINMAX         // No C++-sabotaging “min” and “max” macros, please.
-#define NOMINMAX
 
+
+//----------------------------------------------- Make it less incompatible with C++.
+
+#undef  STRICT
+#define STRICT          // C++-compatible “strongly typed” declarations, please.
+#undef NOMINMAX
+#define NOMINMAX        // No C++-sabotaging “min” and “max” macros, please.
+
+
+//----------------------------------------------- Reduce the size.
+//
 // Reduce the size of the <windows.h>, to the degree practically possible.
 // Also, with WIN32_LEAN_AND_MEAN an `#include <winsock2.h>` will actually include that header.
-#undef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#undef NOCOMM           // No serial comms API please.
-#define NOCOMM
-#define NOMCX           // No modem configuration API please.
-#define NOMCX
-#undef NOOPENFILE       // No OpenFile function please; it's limited and long deprecated.
-#define NOOPENFILE
 
+#undef  WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#undef  NOCOMM
+#define NOCOMM          // No serial comms API please.
+#define NOMCX
+#define NOMCX           // No modem configuration API please.
+#undef  NOOPENFILE
+#define NOOPENFILE      // No OpenFile function please; it's limited and long deprecated.
+
+
+//----------------------------------------------- Select which API versions to support.
+//
 // With much stuff introduced in Windows Vista and later one needs to set version indicators.
 // NTDDI_VERSION (newest macro), _WIN32_WINNT and WINVER (oldest macro) are used by <windows.h>.
 // WINAPI_VERSION and WINAPI_SERVICE_PACK are macros used by and optionally defined by this header.
@@ -97,14 +119,6 @@
 #endif
 
 
-/////////////////////////////////////////////////////////////////////
-#include <windows.h>                                                //
-/////////////////////////////////////////////////////////////////////
+//----------------------------------------------- The actual include.
 
-// Use like `static_assert( IS_NARROW_WINAPI() )`.
-#define IS_NARROW_WINAPI()      (sizeof(*GetCommandLine()) == 1)
-#define IS_NARROW_WINAPI_TEXT() "Define (only) UTF8_WINAPI please."
-
-// Use like `static_assert( IS_WIDE_WINAPI() )`.
-#define IS_WIDE_WINAPI()        (sizeof(*GetCommandLine()) > 1)
-#define IS_WIDE_WINAPI_TEXT()   "Define (only) UNICODE please."
+#include <windows.h>

@@ -20,6 +20,6 @@ windres -i app-manifest.rc -o app-manifest.o
 echo Compiling and linking...
 set STDCPP=-std=c++17 -pedantic-errors -Wall -Wextra
 set MICROLIBS="%~dp0..\..\..\microlibs"
-g++ %STDCPP% -s -I %MICROLIBS% -D FMT_HEADER_ONLY -D UTF8_WINAPI ^
+g++ %STDCPP% -s -I %MICROLIBS% -D FMT_HEADER_ONLY ^
     %CPPFILE% cppm.cpp ^
     app-manifest.o

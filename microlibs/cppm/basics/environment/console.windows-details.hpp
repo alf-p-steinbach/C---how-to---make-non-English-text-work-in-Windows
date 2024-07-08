@@ -16,11 +16,29 @@ namespace cppm {
     namespace impl {
 
         // Ensures UTF-8 encoding assumption + enables ANSI escape sequence support.
-        struct Windows_console_config:
+        class Windows_console_config:
             No_copy_or_move
         {
-            ~Windows_console_config();  // Restores original cp + ANSI escape support state.
-            Windows_console_config();
+            struct Codepage_config: No_copy_or_move
+            {
+                int m_original_codepage;
+                ~Codepage_config();
+                Codepage_config();
+            };
+                
+            struct Ansi_escapes_config: No_copy_or_move
+            {
+                bool m_original_ansi_escapes_enabled;
+                ~Ansi_escapes_config();
+                Ansi_escapes_config();
+            };
+
+            Codepage_config         m_codepage_config;
+            Ansi_escapes_config     m_ansi_escapes_config;
+
+        public:
+            ~Windows_console_config() = default;    // Restores original cp + ANSI escape support state.
+            Windows_console_config() = default;
         };
         using Console_config = Windows_console_config;
 
