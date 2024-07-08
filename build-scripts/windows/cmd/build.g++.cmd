@@ -19,8 +19,8 @@ windres -i app-manifest.rc -o app-manifest.o
 
 echo Compiling and linking...
 set STDCPP=-std=c++17 -pedantic-errors -Wall -Wextra
-set MICROLIBS="%~dp0..\..\..\microlibs"
+set MICROLIBSDIR="%~dp0..\..\..\microlibs"
 rem MinGW g++ links user32 DLL by default also for a console subsystem build.
-g++ %STDCPP% -s -I %MICROLIBS% -D FMT_HEADER_ONLY ^
+g++ %STDCPP% -s -I %MICROLIBSDIR% -D FMT_HEADER_ONLY ^
     %CPPFILE% cppm.cpp ^
     app-manifest.o
