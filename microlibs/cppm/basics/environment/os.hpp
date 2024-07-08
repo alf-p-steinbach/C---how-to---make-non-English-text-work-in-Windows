@@ -10,7 +10,7 @@
 // “e.g. the xlC or the DEC C/C++ compiler”.
 #undef CPPM_OS_IS_UNIX
 #if __has_include( <unistd.h> )
-#   #include <unistd.h>
+#   include <unistd.h>
 #   ifdef _POSIX_VERSION
 #       define CPPM_OS_IS_UNIX true
 #   endif

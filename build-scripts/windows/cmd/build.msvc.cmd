@@ -1,7 +1,7 @@
 @echo off & setlocal enableextensions
 chcp 65001 > nul
 if "%1"=="" (
-    echo !Usage: %~n0 CPPFILENAME 1>&2
+    echo !Usage: %~n0 CPPFILENAME [COMPILER_OPTIONS] 1>&2
     exit /b 1
 )
 set CPPFILE=%1
@@ -16,7 +16,10 @@ if not exist "%CPPDIR%"\cppm.cpp (
     exit /b 1
 )
 
-set MICROLIBS="%~dp0..\..\..\microlibs"
+set MICROLIBSDIR="%~dp0..\..\..\microlibs"
+
+rem set COMPILER_OPTIONS to text of args %1 through n.
+for /f "tokens=1,* delims= " %%a in ("%*") do set COMPILER_OPTIONS=%%b
 
 echo Generating binary resource...
 rc /nologo /fo app-manifest.res "%CPPDIR%\app-manifest.rc"
@@ -27,6 +30,8 @@ if not defined CL (
         /utf-8 /EHsc /GR /permissive- /std:c++17 /Zc:__cplusplus /Zc:externC- ^
         /W4 /wd4459 /D _CRT_SECURE_NO_WARNINGS=1 /D _STL_SECURE_NO_WARNINGS=1
 )
-cl /I %MICROLIBS% -D FMT_HEADER_ONLY /Fe"b" ^
+
+cl /I %MICROLIBSDIR% -D FMT_HEADER_ONLY /Fe"b" ^
     %CPPFILE% "%CPPDIR%\cppm.cpp" ^
-    app-manifest.res
+    app-manifest.res user32.lib ^
+    %COMPILER_OPTIONS%

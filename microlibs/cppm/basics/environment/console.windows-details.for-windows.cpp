@@ -1,5 +1,6 @@
 ﻿#include <cppm/basics/environment/console.windows-details.hpp>
 #include <winapi/codepage-util.hpp>
+#include <winapi/console-util.hpp>
 
 #include <io.h>             // _isatty, _fileno
 
