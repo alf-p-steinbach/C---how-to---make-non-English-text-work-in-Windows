@@ -1,8 +1,21 @@
 ﻿#include <cppm/basics/environment/console.windows-details.hpp>
-#include <winapi/codepage-util.hpp>
-#include <winapi/console-util.hpp>
+#include <winapi/codepage-util.hpp>     // console_codepage, set_console_codepage
+#include <winapi/console-util.hpp>      // console_title, set_console_title, find_console_window
+#include <winapi/process-util.hpp>      // process_id_for, exe_path_for, modulename_for
 
 #include <io.h>             // _isatty, _fileno
+
+namespace {
+    namespace w = winapi;
+    using   w::console_title, w::set_console_title, w::find_console_window,     // <console-util.hpp>
+            w::process_id_for, w::exe_path_for, w::modulename_for;              // <process-util.hpp>
+
+    void foo()
+    {
+        const DWORD process_id = process_id_for( find_console_window() );
+    }
+
+}  // namespace <anon>
 
 
 //------------------------------------------------------------------------------------

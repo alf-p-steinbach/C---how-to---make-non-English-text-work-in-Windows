@@ -18,14 +18,14 @@ namespace winapi {
         return result;
     }
 
-    inline exe_path_for( const HANDLE process )
+    inline auto exe_path_for( const HANDLE process )
         -> wstring
     {
         auto result = wstring( MAX_PATH, L'\0' );
         for( ;; ) {
-            auto size = DWORD( path.size() );
+            auto size = DWORD( result.size() );
             SetLastError( 0 );
-            const bool success = QueryFullProcessImageName( handle, 0, result.data(), &size );
+            const bool success = QueryFullProcessImageName( process, 0, result.data(), &size );
             if( success ) {
                 result.resize( size );
                 break;
@@ -35,15 +35,14 @@ namespace winapi {
             );
             now( larger_buffer_may_fix_it )
                 or fail( "QueryFullProcessImageName failed to obtain exe name." );
-            result.resize( 2*path.size() );
+            result.resize( 2*result.size() );
         }
         return result;
     }
 
-    inline auto modulename_for( const HANDLE process )
+    inline auto modulename_for( in_<wstring> path )
         -> wstring
     {
-        auto path = exe_path_for( process );
         const size_t i_last_separator   = path.find_last_of( L'\\' );
         assert( i_last_separator != path.npos );
         const size_t i_first_char       = i_last_separator + 1;
@@ -55,6 +54,10 @@ namespace winapi {
             );
         return path.substr( i_first_char, n_chars );
     }
+
+    inline auto modulename_for( const HANDLE process )
+        -> wstring
+    { return modulename_for( exe_path_for( process ) ); }
 
     inline auto modulename_for( const DWORD process_id )
         -> wstring
