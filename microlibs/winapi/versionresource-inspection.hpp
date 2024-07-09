@@ -1,17 +1,15 @@
-﻿#include <fmt/core.h>
+﻿#pragma once
+#include <winapi/wrapped/windows-h.wide.hpp>
 #include <cppm/basics.hpp>
-#include <winapi/utf8_from.hpp>
-//#include <winapi/process-util.hpp>
 
 #include <cstdint>
 #include <string>
 #include <optional>
 #include <vector>
 
-namespace app {
+namespace windows {
     using   cppm::Byte, cppm::in_,
             cppm::now, cppm::fail;
-    using   winapi::utf8_from;
     using   std::uint32_t,                      // <cstdint>
             std::string, std::wstring,          // <string>
             std::in_place, std::optional,       // <optional>
@@ -43,7 +41,7 @@ namespace app {
         auto numeric() const
             -> const VS_FIXEDFILEINFO&
         {
-            VS_FIXEDFILEINFO* p_buffer{};
+            VS_FIXEDFILEINFO* p_buffer{};       // Microsoft constness problem.
             UINT n;
             const bool success = VerQueryValue(
                 m_buffer.data(), LR"(\)", reinterpret_cast<void**>( &p_buffer ), &n
@@ -51,7 +49,7 @@ namespace app {
             now( success )
                 or fail( "VerQueryValue failed" );
             now( p_buffer->dwSignature == 0xFEEF04BD )
-                or fail( "Wrong signature value in version info." );
+                or fail( "Wrong signature value in version info resource." );
             return *p_buffer;
         }
 
@@ -65,7 +63,7 @@ namespace app {
         }
     };
 
-    auto opt_version_info_of( in_<wstring> exe_path )
+    inline auto opt_version_info_of( in_<wstring> exe_path )
         -> optional<Version_info>
     {
         try {
@@ -74,25 +72,4 @@ namespace app {
             return {};
         }
     }
-
-    void run()
-    {
-        const auto& exe_path = LR"(C:\Windows\System32\notepad.exe)";
-        // const auto& exe_path = LR"(C:\Users\Alf P. Steinbach\AppData\Local\Microsoft\WindowsApps\notepad.exe)";
-        fmt::print( "{:s}\n", utf8_from( exe_path ) );
-        if( const auto opt_info = opt_version_info_of( exe_path ) ) {
-            const Version_info& info = opt_info.value();
-            const Version ver = info.product_version();
-            fmt::print( "Version {:04X}.{:04X}.{:04X}.{:04X}.\n",
-                ver.parts[3], ver.parts[2], ver.parts[1], ver.parts[0]
-                );
-            fmt::print( "Version {:d}.{:d}.{:d}.{:d}.\n",
-                ver.parts[3], ver.parts[2], ver.parts[1], ver.parts[0]
-                );
-        } else {
-            fmt::print( "Bah, no version info.\n" );
-        }
-    }
-}  // namespace app
-
-auto main() -> int { app::run(); }
+}  // namespace winapi
