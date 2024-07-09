@@ -1,5 +1,7 @@
 ﻿#pragma once
+#include <winapi/wrapped/windows-h.wide.hpp>
 #include <cppm/basics.hpp>
+
 #include <string>
 
 namespace winapi {
@@ -7,7 +9,7 @@ namespace winapi {
             cppm::now, cppm::fail, cppm::Scope_guard;
     using   std::wstring;               // <string>
 
-    auto console_title()
+    inline auto console_title()
         -> wstring
     {
         wstring result( 1024, '\0' );       // From one MS example; another one uses MAX_PATH.
@@ -18,7 +20,7 @@ namespace winapi {
         return result;
     }
 
-    void set_console_title( in_<wstring> new_title )
+    inline void set_console_title( in_<wstring> new_title )
     {
         SetConsoleTitle( new_title.c_str() ) or fail( "SetConsoleTitle failed" );
     }
@@ -36,7 +38,7 @@ namespace winapi {
     //
     // <url: https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/obtain-console-window-handle>
     //
-    auto find_console_window()
+    inline auto find_console_window()
         -> HWND
     {
         const auto& uuid = L"42DDBEFE-C675-4358-8D48-F6FB05AB85A7";
