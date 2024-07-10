@@ -1,5 +1,9 @@
 ﻿#pragma once
 #include <winapi/wrapped/windows-h.wide.hpp>
+
+// modulename_for_process, process_id_for, exe_path_for_process, read_handle_for_process:
+#include <winapi/process-util.hpp>  
+#include <winapi/versionresource-inspection.hpp>        // Version
 #include <cppm/basics.hpp>
 
 #include <string>
@@ -55,5 +59,26 @@ namespace winapi {
         now( window != 0 ) or fail( "FindWindow failed to find the console window." );
 
         return window;
+    }
+
+    struct Console_host_id
+    {
+        wstring     name;
+        Version     version;        // All zeroes if not applicable.
+    };
+
+    inline auto get_console_host_id()
+        -> Console_host_id
+    {
+        Console_host_id result{};
+        const DWORD process_id = process_id_for( find_console_window() );
+        const wstring exe_path = exe_path_for_process( read_handle_for_process( process_id ) );
+        result.name = modulename_for_process( exe_path );
+        try {
+            result.version = Version_info( exe_path ).product_version();
+        } catch( ... ) {
+            // Ignore, use all zeroes result.
+        }
+        return result;
     }
 }  // namespace winapi

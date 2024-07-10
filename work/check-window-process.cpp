@@ -1,5 +1,4 @@
 ﻿#include <winapi/console-util.hpp>                  // find_console_window
-#include <winapi/process-util.hpp>                  // modulename_for, process_id_for
 #include <winapi/utf8_from.hpp>                     // utf8_from
 #include <winapi/versionresource-inspection.hpp>    // Version, opt_version_info_of
 
@@ -8,26 +7,6 @@
 namespace winapi {
     using   std::string, std::wstring;          // <string>
 
-    struct Console_kind
-    {
-        wstring     name;
-        Version     version;        // All zeroes if not applicable.
-    };
-
-    auto get_console_kind()
-        -> Console_kind
-    {
-        Console_kind result{};
-        const DWORD process_id = process_id_for( find_console_window() );
-        const wstring exe_path = exe_path_for_process( read_handle_for_process( process_id ) );
-        result.name = modulename_for_process( exe_path );
-        try {
-            result.version = Version_info( exe_path ).product_version();
-        } catch( ... ) {
-            // Ignore, use all zeroes result.
-        }
-        return result;
-    }
 }  // namespace winapi
 
 #include <fmt/core.h>
@@ -49,34 +28,34 @@ namespace app {
         -> string
     { return fmt::format( "{}.{}.{}.{}", ver.major(), ver.minor(), ver.revision(), ver.build() ); }
 
-    auto is_windows_terminal( in_<winapi::Console_kind> console_kind )
+    auto is_windows_terminal( in_<winapi::Console_host_id> host_id )
         -> bool
-    { return (ascii_uppercased( console_kind.name ) == L"WINDOWSTERMINAL"); };
+    { return (ascii_uppercased( host_id.name ) == L"WINDOWSTERMINAL"); };
 
-    auto is_u8complete_windows_terminal( in_<winapi::Console_kind> console_kind )
+    auto is_u8complete_windows_terminal( in_<winapi::Console_host_id> host_id )
         -> bool
     {
         using namespace std::rel_ops;       // operator>=
-        return (is_windows_terminal( console_kind ) and console_kind.version >= winapi::Version( 1, 20 ));
+        return (is_windows_terminal( host_id ) and host_id.version >= winapi::Version( 1, 20 ));
     }
 
     void run()
     {
-        using   winapi::get_console_kind, winapi::utf8_from;
+        using   winapi::get_console_host_id, winapi::utf8_from;
 
-        const winapi::Console_kind console_kind = get_console_kind();
+        const winapi::Console_host_id   host_id = get_console_host_id();
 
-        fmt::print( "Console kind: “{:s}”", utf8_from( console_kind.name ) );
-        if( console_kind.version.has_value() ) {
-            fmt::print( " version {}", to_string( console_kind.version ) );
+        fmt::print( "Console kind: “{:s}”", utf8_from( host_id.name ) );
+        if( host_id.version.has_value() ) {
+            fmt::print( " version {}", to_string( host_id.version ) );
         }
         fmt::print( ".\n" );
 
         fmt::print( "It’s a {}Windows Terminal.\n",
-            (is_windows_terminal( console_kind )? "" : "NOT ")
+            (is_windows_terminal( host_id )? "" : "NOT ")
             );
         fmt::print( "It’s {}an UTF-8 complete Windows Terminal.\n",
-            (is_u8complete_windows_terminal( console_kind )? "" : "NOT ")
+            (is_u8complete_windows_terminal( host_id )? "" : "NOT ")
             );
     }
 }
