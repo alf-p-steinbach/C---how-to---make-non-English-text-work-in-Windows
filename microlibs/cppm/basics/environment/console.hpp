@@ -11,6 +11,7 @@
 #endif
 static_assert( sizeof( cppm::Console_config ), "OS details header should define Console_config." );
 
+#include <cppm/basics/class_kinds/No_copy_or_move.hpp>
 #include <cppm/basics/environment/Console_kind-Enum.hpp>
 #include <cppm/basics/exception_handling/now_and_fail.hpp>
 #include <cppm/utf8/encoding_assumption_checking.hpp>
@@ -45,21 +46,28 @@ namespace cppm {
             -> bool
         { return (console_kind() >= Console_kind::windows_terminal); }
 
-        inline void require_console()
+        inline void assert_utf8_literals()
         {
             assert( literals_are_utf8()
                 or !"Use the compiler option(s) for UTF-8 literals, e.g. MSVC `/utf-8`." );
+        }
+
+        inline void require_console()
+        {
+            assert_utf8_literals();
             now( this_process_has_a_console() )
                 or fail( "This program requires a console." );
         }
 
-        class Console_usage
+        class Console_usage:
+            public No_copy_or_move
         {
             optional<Console_config>    m_config;
-            
+
         public:
             Console_usage()
             {
+                assert_utf8_literals();
                 if( this_process_has_a_console() ) { m_config.emplace(); }
             }
         };
