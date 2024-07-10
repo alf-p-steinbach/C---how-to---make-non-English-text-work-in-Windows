@@ -6,7 +6,7 @@ Console input and output of non-English characters Just Works&trade; in \*nix en
 
 And it’s not just console i/o that’s problematic in Windows:
 
-international characters in filesystem paths, or in environment variables, or in command line arguments, whatever, are problematic in Windows, by default resulting in gobbledygook garbage and/or failed operations.
+international characters in filesystem paths, or in environment variables, or in command line arguments, whatever, are problematic in portable `char`-based code in Windows, by default resulting in gobbledygook garbage and/or failed operations.
 
 *Most of these problems can be fixed.*
 
@@ -25,12 +25,18 @@ international characters in filesystem paths, or in environment variables, or in
 
 ### 1. *How* to display non-English characters in the console.
 
-To make ordinary output via e.g. `cout` work in Windows you need to take control of four text encodings (how text is represented as a sequence of byte values):
+Using the Windows API’s `wchar_t` based functionality is still the common way to make Windows applications work well with Unicode, even if Windows got support for UTF-8 in June 2019. However such `wchar_t` based code works only in Windows. This *how to* is about portable `char` based code.
+
+To make ordinary output via e.g. `cout` work in Windows you need to take control of four **text encodings** (how text is represented as a sequence of byte values):
 
 1.    The encoding your editor saves source code files with.
 2.    The encoding the compiler assumes for a source code file.
 3.    The encoding the compiler uses to store `char` based literals.
 4.    The encoding the console assumes for a program’s byte stream output.
+
+To make classical file open functions work with international characters in file names, and to make the arguments of `main` work with international text, you additionally need to take control of
+
+5.    The encoding that `char` based Windows API functions assume (called the process’ “ANSI” encoding).
 
 The simplest is to set all these to UTF-8.
 
