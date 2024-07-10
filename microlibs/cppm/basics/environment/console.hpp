@@ -42,7 +42,7 @@ namespace cppm {
             -> bool
         { return (console_kind() != Console_kind::none); }
 
-        inline auto console_has_u8_input()
+        inline auto console_has_utf8_input()
             -> bool
         { return (console_kind() >= Console_kind::windows_terminal); }
 
