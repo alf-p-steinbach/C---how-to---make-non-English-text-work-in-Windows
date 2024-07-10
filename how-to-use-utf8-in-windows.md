@@ -36,7 +36,7 @@ To make ordinary output via e.g. `cout` work in Windows you need to take control
 
 To make classical file open functions work with international characters in file names, and to make the arguments of `main` work with international text, you additionally need to take control of
 
-5.    The encoding that `char` based Windows API functions assume (called the process’ “ANSI” encoding).
+5.    The encoding that `char` based Windows API functions assume, called the process’ “ANSI” encoding.
 
 The simplest is to set all these to UTF-8.
 
