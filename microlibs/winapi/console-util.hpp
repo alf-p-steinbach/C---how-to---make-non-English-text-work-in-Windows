@@ -67,11 +67,15 @@ namespace winapi {
         return window;
     }
 
+    // ConsoleWindowClass  (powershell, cmd, git bash)
+    // DesktopWindowXamlSource (wt)
+    // mintty (MSYS2 bash)
+    //
     struct Console_host_id
     {
         static constexpr auto&  classic_console     = L"ConsoleWindowClass";    // Window class name.
         static constexpr auto&  mintty              = L"mintty";                // Window class name.
-        static constexpr auto&  windows_terminal    = L"WindowsTerminal";       // Exe module name.
+        static constexpr auto&  windows_terminal    = L"WindowsTerminal";       // Executable base name.
         
         wstring     name;
         Version     version;        // All zeroes if not applicable.
@@ -89,13 +93,10 @@ namespace winapi {
             const DWORD process_id = process_id_for( window );
             const wstring exe_path = exe_path_for_process( read_handle_for_process( process_id ) );
             wstring modulename = modulename_for_process( exe_path );
+            // The module name is usually unrelated, e.g. "Cmd", but is good id for Windows Terminal:
             if( modulename == Id::windows_terminal ) {
                 Version version{};
-                try {
-                    version = Version_info( exe_path ).product_version();
-                } catch( ... ) {
-                    // Ignore, use all zeroes result.
-                }
+                try { version = Version_info( exe_path ).product_version(); } catch( ... ) {}
                 return Id{ move( modulename ), version };
             }
         }

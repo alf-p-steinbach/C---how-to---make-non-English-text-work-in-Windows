@@ -2,15 +2,9 @@
 #include <winapi/utf8_from.hpp>                     // utf8_from
 #include <winapi/versionresource-inspection.hpp>    // Version, opt_version_info_of
 
-// Known OK WT version is 1.20, May 2024.
-
-namespace winapi {
-    using   std::string, std::wstring;          // <string>
-
-}  // namespace winapi
-
 #include <fmt/core.h>
 #include <string_view>
+
 namespace app {
     using   cppm::in_;
     using   std::string, std::wstring,  // <string>
