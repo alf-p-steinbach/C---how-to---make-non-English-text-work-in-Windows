@@ -22,4 +22,3 @@ namespace app{
 }  // namespace app
 
 auto main() -> int { app::run(); }
-

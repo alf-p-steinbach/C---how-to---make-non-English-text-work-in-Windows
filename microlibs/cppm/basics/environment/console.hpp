@@ -9,21 +9,27 @@
 #   error "Only Windows and Unix are supported."
 #   include <stop-compilation>
 #endif
+static_assert( sizeof( cppm::Console_config ), "OS details header should define Console_config." );
 
 #include <cppm/basics/environment/Console_kind-Enum.hpp>
 #include <cppm/basics/exception_handling/now_and_fail.hpp>
 #include <cppm/utf8/encoding_assumption_checking.hpp>
 
 #include <cstdio>
+#include <optional>
 
 namespace cppm {
-    using   std::FILE;          // <cstdio>
+    using   std::FILE,          // <cstdio>
+            std::optional;      // <optional>
 
     inline namespace environment {
-        // Posix `isatty`, Windows `_isatty`.
-        inline auto is_a_console( FILE* f ) -> bool;            // Re-declaration for exposition.
-        inline auto get_console_kind() -> Console_kind::Enum;   // Re-declaration for exposition.
+        // For-exposition redeclarations of stuff from either the Windows or Unix details header.
+        class Console_config;
+        inline auto is_a_console( FILE* f ) -> bool;
+        inline auto get_console_kind() -> Console_kind::Enum;
+    }  // inline namespace environment
 
+    inline namespace environment {
         inline auto console_kind()
             -> Console_kind::Enum
         {
@@ -39,25 +45,23 @@ namespace cppm {
             -> bool
         { return (console_kind() >= Console_kind::windows_terminal); }
 
-        class Console_existence
+        inline void require_console()
         {
-        protected:
-            Console_existence()
-            {
-                assert( literals_are_utf8()
-                    or !"Use the compiler option(s) for UTF-8 literals, e.g. MSVC `/utf-8`." );
-                now( this_process_has_a_console() )
-                    or fail( "This program requires a console." );
-            }
-        };
+            assert( literals_are_utf8()
+                or !"Use the compiler option(s) for UTF-8 literals, e.g. MSVC `/utf-8`." );
+            now( this_process_has_a_console() )
+                or fail( "This program requires a console." );
+        }
 
-        class Console_usage:
-            public Console_existence
+        class Console_usage
         {
-            impl::Console_config    m_config;   // From either the Windows or Unix details header.
+            optional<Console_config>    m_config;
             
         public:
-            Console_usage() {}
+            Console_usage()
+            {
+                if( this_process_has_a_console() ) { m_config.emplace(); }
+            }
         };
     }  // inline namespace environment
 }  // namespace cppm

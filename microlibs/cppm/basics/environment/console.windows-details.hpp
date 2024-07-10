@@ -14,7 +14,6 @@ namespace cppm {
     using   std::FILE;          // <cstdio>
 
     namespace impl {
-
         // Ensures UTF-8 encoding assumption + enables ANSI escape sequence support.
         class Windows_console_config:
             No_copy_or_move
@@ -40,14 +39,13 @@ namespace cppm {
             ~Windows_console_config() = default;    // Restores original cp + ANSI escape support state.
             Windows_console_config() = default;
         };
-        using Console_config = Windows_console_config;
 
         extern auto is_a_windows_console( FILE* f ) -> bool;
         extern auto get_windows_console_kind() -> Console_kind::Enum;   // `none` or `windows_...`
-
     }  // namespace impl
 
     inline namespace environment {
+        class Console_config: public impl::Windows_console_config {};
 
         inline auto is_a_console( FILE* f )
             -> bool
