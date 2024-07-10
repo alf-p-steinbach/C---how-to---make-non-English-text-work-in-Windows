@@ -100,6 +100,6 @@ namespace winapi {
                 return Id{ move( modulename ), version };
             }
         }
-        return Id{ move( windowclass_name ) };
+        return Id{ move( windowclass_name ), {} };
     }
 }  // namespace winapi

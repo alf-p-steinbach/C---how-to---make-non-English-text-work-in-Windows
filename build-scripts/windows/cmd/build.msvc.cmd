@@ -33,5 +33,5 @@ if not defined CL (
 
 cl /I %MICROLIBSDIR% -D FMT_HEADER_ONLY /Fe"b" ^
     %CPPFILE% "%CPPDIR%\cppm.cpp" ^
-    app-manifest.res user32.lib ^
+    app-manifest.res user32.lib version.lib ^
     %COMPILER_OPTIONS%
