@@ -1,5 +1,4 @@
 @echo off & setlocal enableextensions
-chcp 65001 > nul
 if "%1"=="" (
     echo !Usage: %~n0 CPPFILENAME [COMPILER_OPTIONS] 1>&2
     exit /b 1
