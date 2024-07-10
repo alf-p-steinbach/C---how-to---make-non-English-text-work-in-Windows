@@ -55,11 +55,12 @@ namespace winapi {
             return 0;
         }
         
-        friend
-        auto operator<( in_<Version> a, in_<Version> b ) -> bool { return (compare( a, b ) < 0); }
-
-        friend
-        auto operator==( in_<Version> a, in_<Version> b ) -> bool { return (compare( a, b ) == 0); }
+        friend auto operator< ( in_<Version> a, in_<Version> b ) -> bool { return (compare( a, b ) < 0); }
+        friend auto operator<=( in_<Version> a, in_<Version> b ) -> bool { return (compare( a, b ) <= 0); }
+        friend auto operator==( in_<Version> a, in_<Version> b ) -> bool { return (compare( a, b ) == 0); }
+        friend auto operator>=( in_<Version> a, in_<Version> b ) -> bool { return (compare( a, b ) >= 0); }
+        friend auto operator> ( in_<Version> a, in_<Version> b ) -> bool { return (compare( a, b ) > 0); }
+        friend auto operator!=( in_<Version> a, in_<Version> b ) -> bool { return (compare( a, b ) != 0); }
     };
 
     class Version_info

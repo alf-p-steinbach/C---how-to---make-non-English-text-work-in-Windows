@@ -12,6 +12,7 @@ namespace {
             w::process_id_for, w::exe_path_for, w::modulename_for;              // <process-util.hpp>
     using   std::string, std::wstring;          // <string>
 
+/*
     auto ascii_uppercased( in_<wstring_view> s )
         -> wstring
     {
@@ -19,6 +20,7 @@ namespace {
         for( const wchar_t ch: s ) { result += (L'a' <= ch and ch <= L'z'? ch - L'a' + L'A' : ch); }
         return result;
     }
+*/
 
     auto to_string( in_<winapi::Version> ver )
         -> string
@@ -39,17 +41,24 @@ namespace {
     // DesktopWindowXamlSource (wt)
     // mintty (MSYS2 bash)
 
-    auto get_console_kind()
+    auto get_console_kind_impl()
         -> Console_kind::Enum
     {
-        const winapi::Console_host console_host = get_console_host();
-        if( (ascii_uppercased( console_host.name ) == L"WINDOWSTERMINAL") ) {
-            return (console_kind.version >= winapi::Version( 1, 20 )
-                ? Console_kind::old_windows_terminal
-                : Console_kind::windows_terminal
+        using Id = winapi::Console_host_id;
+
+        const Id host_id = get_console_host();
+        if( host_id.name == Id::windows_terminal ) {
+            return (host_id.version >= winapi::Version( 1, 20 )
+                ? Console_kind::windows_terminal
+                : Console_kind::old_windows_terminal
                 );
+        } else if( host_id.name == Id::mintty ) {
+            return Console_kind::mintty;
+        } else if( host_id.name == Id::classic_console ) {
+            return Console_kind::windows_classic;
+        } else {
+            return Console_kind::unknown;
         }
-        return Console_kind::windows_classic;
     }
 }  // namespace <anon>
 
@@ -74,4 +83,4 @@ auto cppm::impl::is_a_windows_console( FILE* f )
 
 auto cppm::impl::get_windows_console_kind()
     -> Console_kind::Enum
-{ return {}; }          // TODO:
+{ return get_console_kind_impl(); }

@@ -1,17 +1,23 @@
 ﻿#pragma once
 #include <winapi/wrapped/windows-h.wide.hpp>
 
-// modulename_for_process, process_id_for, exe_path_for_process, read_handle_for_process:
-#include <winapi/process-util.hpp>  
+// <<winapi/process-util.hpp> brings in
+// modulename_for_process, process_id_for, exe_path_for_process, read_handle_for_process
+
+#include <winapi/gui-util.hpp>                          // windowclass_name_of
+#include <winapi/process-util.hpp>                      // (comment above)
 #include <winapi/versionresource-inspection.hpp>        // Version
+
 #include <cppm/basics.hpp>
 
 #include <string>
+#include <utility>
 
 namespace winapi {
     using   cppm::in_, cppm::intsize_of,
             cppm::now, cppm::fail, cppm::Scope_guard;
-    using   std::wstring;               // <string>
+    using   std::wstring,               // <string>
+            std::move;                  // <utility>
 
     inline auto console_title()
         -> wstring
@@ -63,6 +69,10 @@ namespace winapi {
 
     struct Console_host_id
     {
+        static constexpr auto&  classic_console     = L"ConsoleWindowClass";    // Window class name.
+        static constexpr auto&  mintty              = L"mintty";                // Window class name.
+        static constexpr auto&  windows_terminal    = L"WindowsTerminal";       // Exe module name.
+        
         wstring     name;
         Version     version;        // All zeroes if not applicable.
     };
@@ -70,15 +80,25 @@ namespace winapi {
     inline auto get_console_host_id()
         -> Console_host_id
     {
-        Console_host_id result{};
-        const DWORD process_id = process_id_for( find_console_window() );
-        const wstring exe_path = exe_path_for_process( read_handle_for_process( process_id ) );
-        result.name = modulename_for_process( exe_path );
-        try {
-            result.version = Version_info( exe_path ).product_version();
-        } catch( ... ) {
-            // Ignore, use all zeroes result.
+        using Id = Console_host_id;
+        const HWND window = find_console_window();
+        wstring windowclass_name = windowclass_name_of( window );
+        const bool reliable_windowclass_as_id =
+            windowclass_name == Id::classic_console or windowclass_name == Id::mintty;
+        if( not reliable_windowclass_as_id ) {
+            const DWORD process_id = process_id_for( window );
+            const wstring exe_path = exe_path_for_process( read_handle_for_process( process_id ) );
+            wstring modulename = modulename_for_process( exe_path );
+            if( modulename == Id::windows_terminal ) {
+                Version version{};
+                try {
+                    version = Version_info( exe_path ).product_version();
+                } catch( ... ) {
+                    // Ignore, use all zeroes result.
+                }
+                return Id{ move( modulename ), version };
+            }
         }
-        return result;
+        return Id{ move( windowclass_name ) };
     }
 }  // namespace winapi
