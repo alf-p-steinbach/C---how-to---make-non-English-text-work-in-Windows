@@ -6,7 +6,7 @@ Console input and output of non-English characters Just Works&trade; in \*nix en
 
 And it’s not just console i/o that’s problematic in Windows:
 
-international characters in filesystem paths, or in environment variables, or in command line arguments, whatever, are problematic in portable `char`-based code in Windows, by default resulting in gobbledygook garbage and/or failed operations.
+international characters in filesystem paths, or in environment variables, or in command line arguments, whatever, are problematic for portable `char`-based code in Windows, by default resulting in gobbledygook garbage and/or failed operations.
 
 *Most of these problems can be fixed.*
 
@@ -25,7 +25,7 @@ international characters in filesystem paths, or in environment variables, or in
 
 ### 1. *How* to display non-English characters in the console.
 
-As of mid 2024 the common way to make Windows applications work well with international text is still to use the Windows API’s `wchar_t` based functionality. However such `wchar_t` based code using the Windows API works only in Windows. This *how to* is about portable `char` based code.
+As of mid 2024 the common way to make Windows applications work well with international text is still to use the Windows API’s `wchar_t` based functionality. However such `wchar_t` based code using the Windows API is complex and works only in Windows. This *how to* is instead about the portable `char` based code common in book and tutorial examples, in portable libraries and programs, and expected in student work.
 
 To make ordinary output via e.g. `cout` work in Windows you need to take control of four **text encodings** &mdash; how text is represented as a sequence of byte values:
 
