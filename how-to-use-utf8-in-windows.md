@@ -153,7 +153,7 @@ Finally, what to do about characters that the {fmt} library estimates incorrect 
 * give them special treatment,  
   e.g. generate the output line with appropriate width substitute symbols and then replace the substitutes.
 
-For coloring of layout-formatted text the least ungood solution may be to [parse a pure text result and apply coloring to that](code/pascal-triangle.colored.cpp), with no further formatting.
+For coloring of layout-formatted text the least ungood special treatment may be to [parse a pure text result and apply coloring to that](code/pascal-triangle.colored.cpp), with no further formatting.
 
 ### 3. *How* to input non-English characters from the console.
 
