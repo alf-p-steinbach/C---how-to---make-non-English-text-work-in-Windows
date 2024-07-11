@@ -206,6 +206,31 @@ Example run:
 > Good to meet you, Beate Åshild Synnøve Klæbo, a 日本国 кошка!
 > ```
 
+A corresponding `input_line` function defined in terms of Windows’ `ReadConsoleW` can go like this:
+
+In [*code/hello2.using-winapi.cpp*](code/hello2.using-winapi.cpp):
+
+```cpp
+auto input_line() -> string
+{
+    static const HANDLE input = ::GetStdHandle( STD_INPUT_HANDLE );
+    
+    wchar_t buffer[256];        // Sufficient for interactive line input.
+    DWORD n_chars_read = 0;
+    ::ReadConsole( input, buffer, size( buffer ), &n_chars_read, nullptr ); // TODO: failure handling.
+    const int n_u8_bytes = ::WideCharToMultiByte(
+        CP_UTF8, 0, buffer, n_chars_read, nullptr, 0, nullptr, nullptr
+        );
+    auto result = string( n_u8_bytes, '\0' );
+    ::WideCharToMultiByte(
+        CP_UTF8, 0, buffer, n_chars_read, result.data(), n_u8_bytes, nullptr, nullptr
+        );
+    while( not result.empty() and Byte( result.back() ) < ' ' ) { result.pop_back(); }      // CRLF.
+    return result;
+}
+```
+
+To me the DIY `ReadConsoleW` based solutions is most reasonable for tools made for use by others, since it avoids introducing a huge dependency, while simply using a recent version of Windows Terminal &mdash; and writing pure standard C++ code &mdash; is preferable for personal small tools and exploration programs.
 
 ### 4. *How* to get the `main` arguments UTF-8 encoded.
 
