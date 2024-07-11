@@ -136,7 +136,7 @@ auto display_width_of( in_<string_view> s )
     const string    sx                  = string( s ) + '!';    // A non-space single cell character.
     const int       n_sx_bytes          = intsize_of( sx );
     const int       field_width         = n_sx_bytes;
-    const string    field               = format( "{:{}s}", sx, field_width );
+    const string    field               = format( "{:<{}s}", sx, field_width );
     const int       n_padding_spaces    = static_cast<int>( field.size() - field.rfind( '!' ) - 1 );
     const int       sx_width            = field_width - n_padding_spaces;
 
@@ -145,6 +145,13 @@ auto display_width_of( in_<string_view> s )
 ```
 
 Alternatively there are 3rd party libraries that do accurate display width estimates, more efficiently, for Unicode text.
+
+Finally, what to do about characters that the {fmt} library estimates incorrect width for, such as as of this writing “❌” and “✅”? Not to mention escape sequences (e.g. for coloring text), which should be estimated as zero width, but currently aren’t? Well I know of only two practical approaches:
+
+* replace them with less problematic substitutes,  
+  e.g. math symbols “**`×`**” and “**√**” for the above examples; or
+* give them special treatment,  
+  e.g. generate the output line with appropriate substitute symbols and then replace the substitutes.
 
 ### 3. *How* to input non-English characters from the console.
 
