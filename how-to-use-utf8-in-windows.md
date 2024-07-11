@@ -96,13 +96,37 @@ auto main() -> int
 
 ### 2. *How* to format fixed width fields (regardless of Windows/*nix/whatever platform).
 
-There is no good way to make fixed width field ***formatting*** with `std::setw` work, because it has an assumption of 1 byte = 1 character, which doesn’t hold with UTF-8 (assumptions, again). The same goes for `printf` and family. And likely for DIY solutions.
+There is no good way to make fixed width field ***formatting*** with iostreams `std::setw` work, because it has an assumption of 1 byte = 1 character, which doesn’t hold with UTF-8 (assumptions, again).
+
+The same goes for `printf` and family, and likely for DIY solutions.
 
 But the aforementioned [{fmt} library](https://github.com/fmtlib/fmt) does proper fixed width field formatting with UTF-8.
 
-In addition to understanding a variable number of bytes per character, the {fmt} library takes into account whether a character such as an emoji will occupy two character cells in the console. The widths you specify are number of character cells, *display widths*, not number of characters. It Just Works&trade;.
+In addition to understanding a variable number of bytes per character, the {fmt} library takes into account whether a character such as an emoji will occupy two **character cells** in the console. The widths you specify are number of character cells, *display widths*, not number of characters. It Just Works&trade;.
 
-{fmt} supports left-, right- and center-alignment of a text in a field of a (possibly dynamic) specified number of cells. But unfortunately the library doesn’t directly expose its internal estimate of the text’s display width, which you need for e.g. displaying a box of dynamic width suitable for containing a given text. However you can obtain that number by formatting the text + e.g. `!` (any non-space single cell character) as left-adjusted in a field *n* cells wide, where *n* is at least 1 + the number of bytes in the text representation; count the number of trailing spaces in the result; and do the math:
+{fmt} supports `<` left-, `>` right- and `^` center-alignment of a text in a field of a (possibly dynamic) specified number of cells, e.g. in the first output line below with 5 cells per character:
+
+<img src="images/fixed-width-fields.png">
+
+The code that produced that first line is a bit convoluted due to the variable number of bytes per UTF-8 character, i.e. that generally a character isn’t represented with a single `char`.
+
+Neither the C++ standard library nor the {fmt} library provide UTF-8 iteration functionality, so for now such code can look like this:
+
+In [*fixed-width-fields.cpp*](code/fixed-width-fields.cpp):
+
+```cpp
+    const auto s        =  "日本国 кошка’s FTW!"sv;
+
+    for( const auto& code: s ) {
+        if( not is_u8_tailbyte( code ) ) {
+            const auto u8_char = string_view( &code, u8_seq_length( code ) );
+            fmt::print( "{:>5s}", u8_char );
+        }
+    }
+    fmt::print( "\n" );
+```
+
+And unfortunately the {fmt} library doesn’t directly expose its internal estimate of the text’s display width, which you need for e.g. displaying a box of dynamic width suitable for containing a given text. However you can obtain that number by formatting the text + e.g. `!` (any non-space single cell character) as left-adjusted in a field *n* cells wide, where *n* is at least 1 + the number of bytes in the text representation; count the number of trailing spaces in the result; and do the math:
 
 ```cpp
 // Can be optimized in umpteen ways, but if that's a concern better use a 3rd party library.
