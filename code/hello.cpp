@@ -2,6 +2,7 @@
 #include <iostream>         // cout, endl
 using std::system, std::cout, std::endl;
 using Byte = unsigned char;
+
 constexpr auto& oe = "ø";
 
 constexpr auto literals_are_utf8()
@@ -15,5 +16,5 @@ static_assert( literals_are_utf8(), "With MSVC use option /utf-8." );
 
 auto main() -> int
 {
-    cout << "Every 日本国 кошка loves Norwegian blåbærsyltetøy! Yay!" << endl;
+    cout << "Every 日本国 кошка loves Norwegian blåbærsyltetøy! Yay! 😃" << endl;
 }
