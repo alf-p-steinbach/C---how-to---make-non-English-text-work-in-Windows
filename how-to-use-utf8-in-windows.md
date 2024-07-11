@@ -25,7 +25,7 @@ international characters in filesystem paths, or in environment variables, or in
 
 ### 1. *How* to display non-English characters in the console.
 
-As of mid 2024 the common way to make Windows applications work well with international text is still to use the Windows API’s `wchar_t` based functionality. However such `wchar_t` based code using the Windows API is complex and works only in Windows. This *how to* is instead about the portable `char` based code common in book and tutorial examples, in portable libraries and programs, and expected in student work.
+As of mid 2024 the common way to make Windows applications work well with international text is still to use the Windows API’s `wchar_t` based functionality. However such `wchar_t` based code using the Windows API is complex and works only in Windows. This *how to* is instead about the portable `char` based code common in book and tutorial examples, in portable libraries and programs, and in student work.
 
 To make ordinary output via e.g. `cout` work in Windows you need to take control of four **text encodings** &mdash; how text is represented as a sequence of byte values:
 
