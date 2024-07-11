@@ -34,6 +34,7 @@ namespace cppm {
         inline auto console_kind()
             -> Console_kind::Enum
         {
+            // Cached console kind info, assuming the process doesn't create or remove a console.
             static const Console_kind::Enum     the_console_kind = get_console_kind();
             return the_console_kind;
         }

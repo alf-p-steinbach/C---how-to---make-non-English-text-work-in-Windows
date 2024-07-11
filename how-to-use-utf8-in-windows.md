@@ -232,6 +232,8 @@ auto input_line() -> string
 
 To me the DIY `ReadConsoleW` based solutions is most reasonable for tools made for use by others, since it avoids introducing a huge dependency, while simply using a recent version of Windows Terminal &mdash; and writing pure standard C++ code &mdash; is preferable for personal small tools and exploration programs.
 
+For the Windows Terminal approach you can use the [code provided here](microlibs/cppm/basics/environment/console.hpp) as a starting point for some library facility that supports checking that the program indeed is running in a recent Windows Terminal, and that can configure that terminal with UTF-8 encoding assumption (codepage 65001), and enabling its ANSI escape sequence support.
+
 ### 4. *How* to get the `main` arguments UTF-8 encoded.
 
 In Windows the `main` arguments `argv` are the original UTF-16 encoded command line arguments (which can be obtained via `GetCommandLine()` + `CommandLineToArgvW()`) translated to the process’ Windows ANSI encoding (the result of `GetACP()`). And by default `GetACP()` returns Windows’ system Windows ANSI encoding, in Western countries usually codepage 1252 = Windows ANSI Western, which is a single byte per character Latin-1 extension. So by  default this is a **lossy conversion** where e.g. filenames specified as command line arguments, can be irrevocably trashed.
