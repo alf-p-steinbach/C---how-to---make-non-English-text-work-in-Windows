@@ -157,15 +157,54 @@ For coloring of layout-formatted text the least ungood special treatment may be 
 
 ### 3. *How* to input non-English characters from the console.
 
-For ***input*** it doesn’t suffice to set the Windows console to assume UTF-8.
+UTF-8 for console byte stream input is as of mid 2024 still unsupported down at the Windows API level: [non-ASCII input characters just produce nullbytes](https://github.com/microsoft/terminal/issues/4551).
 
-UTF-8 for console byte stream input is unsupported down at the Windows API level: [non-ASCII input characters just produce nullbytes](https://github.com/microsoft/terminal/issues/4551).
+And unfortunately current C++ standard library implementations don’t relate to that as they should, by doing console input in The Windows Way&trade;, but instead they just use byte stream input as in Unix, which generally Does Not Work&trade; in Windows.
 
-However, you can do UTF-8 console input via third party libraries such as [Boost NoWide](https://www.boost.org/doc/libs/1_85_0/libs/nowide/doc/html/index.html).
+I.e. for C++ standard library ***input*** from a classic Windows console it doesn’t suffice to set the console’s encoding assumption to UTF-8:
 
-Or you can implement it yourself via Windows’ console API, e.g. [`ReadConsoleW`](https://learn.microsoft.com/en-us/windows/console/readconsole).
+> ```txt
+> Hi, what’s your name? 𝘽𝙚𝙖𝙩𝙚 𝘼̊𝙨𝙝𝙞𝙡𝙙 𝙎𝙮𝙣𝙣ø𝙫𝙚 𝙆𝙡æ𝙗𝙤, 𝙖 日本国 кошка
+> Good to meet you, Beate  shild Synn ve Kl bo, a          !
+> ```
 
-For, the problem is not Windows or Windows consoles, but merely low Quality of Implementation for this in all (I believe) Windows C++ standard library implementations, where byte stream oriented code that works fine in *nix systems has been blindly, and incorrectly, copied over to the Windows implementation. That’s sort of like the Ariane rocket failure. In both cases caused by management or possibly coders doing the easy reuse thing and disregarding critical assumptions.
+However, you can:
+
+* use [Windows Terminal](https://github.com/microsoft/terminal) with a version later than 1.20 (May 2024);
+* do UTF-8 console input via third party libraries such as [Boost NoWide](https://www.boost.org/doc/libs/1_85_0/libs/nowide/doc/html/index.html); or
+* you can implement it yourself via Windows’ console API, e.g. [`ReadConsoleW`](https://learn.microsoft.com/en-us/windows/console/readconsole).
+
+Example of using Boost NoWide, which is easy but adds a dependency on the monolithic Boost library, where NoWide is one of the few sub-libraries that require separate compilation:
+
+[*hello2.using-boost-nowide.cpp*](code/hello2.using-boost-nowide.cpp):
+
+```cpp
+#include <fmt/core.h>
+#include <boost/nowide/iostream.hpp>
+#include <string>
+using   std::getline, std::string;              // <string>
+
+auto input_line() -> string
+{
+    string result;
+    getline( boost::nowide::cin, result );      // TODO: failure handling.
+    return result;
+}
+
+auto main() -> int
+{
+    fmt::print( "Hi, what’s your name? " );
+    const string name = input_line();
+    fmt::print( "Good to meet you, {}!\n", name );
+}
+```
+
+Example run:
+
+> ```text
+> Hi, what’s your name? 𝘽𝙚𝙖𝙩𝙚 𝘼̊𝙨𝙝𝙞𝙡𝙙 𝙎𝙮𝙣𝙣ø𝙫𝙚 𝙆𝙡æ𝙗𝙤, 𝙖 日本国 кошка
+> Good to meet you, Beate Åshild Synnøve Klæbo, a 日本国 кошка!
+> ```
 
 
 ### 4. *How* to get the `main` arguments UTF-8 encoded.
