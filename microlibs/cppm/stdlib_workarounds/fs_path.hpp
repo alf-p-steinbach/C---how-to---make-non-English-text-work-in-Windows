@@ -1,5 +1,4 @@
 #pragma once
-
 #include <cppm/basics/type_makers.hpp>                      // in_
 #include <cppm/utf8/encoding_assumption_checking.hpp>       // globally_once_assert_utf8_literals
 
