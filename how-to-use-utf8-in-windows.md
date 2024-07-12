@@ -230,7 +230,7 @@ auto input_line() -> string
 }
 ```
 
-To me the DIY `ReadConsoleW` based solutions is most reasonable for tools made for use by others, since it avoids introducing a huge dependency, while simply using a recent version of Windows Terminal &mdash; and writing pure standard C++ code &mdash; is preferable for personal small tools and exploration programs.
+To me the DIY `ReadConsoleW` based solution is most reasonable for tools made for possible use by others, since it it doesn’t require the users to install or do anything extra and avoids introducing a huge library dependency, while simply using a recent version of Windows Terminal &mdash; and writing pure standard C++ code &mdash; (to me) is preferable for personal small tools and exploration programs.
 
 For the Windows Terminal approach you can use the [code provided here](microlibs/cppm/basics/environment/console.hpp) as a starting point for some library facility that supports checking that the program indeed is running in a recent Windows Terminal, and that can configure that terminal with UTF-8 encoding assumption (codepage 65001), and enabling its ANSI escape sequence support.
 
