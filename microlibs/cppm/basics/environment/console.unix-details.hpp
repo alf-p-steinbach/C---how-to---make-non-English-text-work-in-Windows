@@ -11,6 +11,7 @@
 namespace cppm {
     namespace impl {
         struct Unix_console_config: No_copy_or_move {};
+        extern auto is_a_unix_console( FILE* f ) -> bool;
         extern auto get_unix_console_kind() -> Console_kind::Enum;      // `none` or `unix`.
     }  // namespace impl
 
