@@ -316,7 +316,7 @@ However, a cost, a price paid for the “all UTF-8” environment, is that the C
 ifstream f( fs::path( "æøå-poem.txt" ) );
 ```
 
-&hellip; where `fs` is an alias for `std::filesystem`, is no longer guaranteed to work&hellip; And as I read the standard it’s formally guaranteed to *not* work unless Windows has been configured to use UTF-8 globally (a beta feature as I write this). Because: `fs::path` incorrectly expects the `char`-based text to be encoded with the **system Windows ANSI** encoding instead of the **process Windows ANSI** encoding.
+&hellip; where `fs` is an alias for `std::filesystem`, is no longer guaranteed to work&hellip; And as I read the standard it’s formally guaranteed to *not* work unless Windows has been configured to use UTF-8 globally (a beta feature as I write this). Because: `fs::path` incorrectly expects the `char`-based text to be encoded with the *system Windows ANSI* encoding instead of the *process Windows ANSI* encoding.
 
 A small [test program](apps/report_encodings/report_encodings.cpp) with all of the measures (1) through (5) in place, reported:
 
@@ -361,7 +361,6 @@ To define a wrapper `Path` one needs functionality that works the same in C++17 
 
 ```cpp
 #pragma once
-
 #include <cppm/basics/type_makers.hpp>                      // in_
 #include <cppm/utf8/encoding_assumption_checking.hpp>       // globally_once_assert_utf8_literals
 
