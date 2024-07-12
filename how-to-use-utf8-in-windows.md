@@ -236,9 +236,13 @@ For the Windows Terminal approach you can use the [code provided here](microlibs
 
 ### 4. *How* to get the `main` arguments UTF-8 encoded.
 
-In Windows the `main` arguments `argv` are the original UTF-16 encoded command line arguments (which can be obtained via `GetCommandLine()` + `CommandLineToArgvW()`) translated to the process’ Windows ANSI encoding (the result of `GetACP()`). And by default `GetACP()` returns Windows’ system Windows ANSI encoding, in Western countries usually codepage 1252 = Windows ANSI Western, which is a single byte per character Latin-1 extension. So by  default this is a **lossy conversion** where e.g. filenames specified as command line arguments, can be irrevocably trashed.
+With all Windows C++ implementations the `main` arguments `argv` are by default encoded with the “Windows ANSI” encoding, which is an encoding *choice* (i.e. one can choose which concrete encoding it should be), but which in English speaking countries and in most Western countries defaults to [Windows ANSI Western](https://en.wikipedia.org/wiki/Windows-1252#Codepage_layout) a.k.a. codepage 1252.
 
-The AFAIK only way to make `GetACP` return the UTF-8 encoding, codepage 65001, so that the `main` arguments get UTF-8 encoded, is (this works since June 2019) to [equip the executable with a suitable **manifest** resource](https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page#set-a-process-code-page-to-utf-8).
+Windows ANSI Western is a single byte per character Latin-1 extension. I.e. it has a very small repertoire of characters with no Greek or Russian or Chinese or Japanese or Arabic, etc.,  but due to its Latin-1 base it does have the Norwegian letters `æ`, `ø` and `å`. And so in particular filenames specified as command line arguments can be irrevocably trashed when they’re represented as `main` arguments: it's a **lossy conversion**.
+
+Which concrete encoding the **system Windows ANSI** is, is at bottom [specified in the Windows registry](https://docs.informatica.com/master-data-management/multidomain-mdm/10-3-hotfix-1/configuration-guide/introduction/configuring-international-data-support/configuring-the-ansi-code-page-in-the-windows-registry.html). However, the conversion of originally UTF-16 encoded command line arguments to `main` arguments uses the **process Windows ANSI** encoding, which just has the system Windows ANSI as default. The process Windows ANSI encoding is available via the `GetACP` “get ansi code page” function (as of July 2024 this function is still incorrectly documented as returning the system Windows ANSI encoding, which was how things worked before Windows got UTF-8 support in June 2019).
+
+As far as I know the only way to configure the process Windows ANSI encoding, so that `GetACP` returns the UTF-8 encoding, codepage 65001, so that the `main` arguments get UTF-8 encoded, is (this works since June 2019) to [equip the executable with a suitable **manifest** resource](https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page#set-a-process-code-page-to-utf-8).
 
 The manifest is a simple UTF-8 encoded text file which can go like this:
 
@@ -270,7 +274,7 @@ A minimal resource script for a manifest resource named “app-manifest.xml”:
 ```
 That’s a lot of magic incantations &mdash; long reams of just semi-documented apparently arbitrary technobabble text &mdash; just to flip a binary decision in the direction that should be the default. At worst it should have been a simple yes/no compiler option. But, again, Microsoft.
 
-Positive: this also fixes the encoding of environment variables as viewed by [`getenv()`](https://en.cppreference.com/w/cpp/utility/program/getenv), and with luck it also fixes naïve use of `std::filesystem::path`.
+Positive: this also fixes the encoding of environment variables as viewed by [`getenv()`](https://en.cppreference.com/w/cpp/utility/program/getenv); with luck it also fixes naïve use of `std::filesystem::path`; and not the least, it fixes use of classic file open/create functions, also indirect use via third party libraries such as Open CV.
 
 Negative: in C++ it does not necessarily fix the encoding assumption for `char` based strings passed to wide streams, and in the Windows API GDI graphics (e.g. `TextOutA()`) does not honor the process ANSI codepage.
 
