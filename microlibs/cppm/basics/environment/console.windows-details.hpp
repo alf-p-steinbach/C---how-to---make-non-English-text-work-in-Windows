@@ -41,7 +41,7 @@ namespace cppm {
         };
 
         extern auto is_a_windows_console( FILE* f ) -> bool;
-        extern auto get_windows_console_kind() -> Console_kind::Enum;   // `none` or `windows_...`
+        extern auto get_windows_console_kind() -> Console_kind::Enum;   // none, mintty or windows_...
     }  // namespace impl
 
     inline namespace environment {
