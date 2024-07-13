@@ -13,6 +13,5 @@ namespace cppm {
             unix,                   // Supports UTF-8 input.
             _
         }; };
-
     }  // inline namespace environment
 }  // namespace cppm
