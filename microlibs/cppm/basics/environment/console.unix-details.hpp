@@ -8,7 +8,11 @@
 #include <cppm/basics/class_kinds/No_copy_or_move.hpp>
 #include <cppm/basics/environment/Console_kind-Enum.hpp>
 
+#include <cstdio>
+
 namespace cppm {
+    using       std::FILE;          // <cstdio>
+
     namespace impl {
         struct Unix_console_config: No_copy_or_move {};
         extern auto is_a_unix_console( FILE* f ) -> bool;

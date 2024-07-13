@@ -3,3 +3,4 @@
 *.o
 *.obj
 code/a
+*.res
