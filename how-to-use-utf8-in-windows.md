@@ -40,6 +40,8 @@ To make classical file open functions work with international characters in file
 
 The simplest is to set all these to UTF-8.
 
+---
+
 Taking care of (1), the source code’s encoding, depends on the editor you use. The editor’s functionality for that can be available via its “save as” dialog (Visual Studio), or e.g. as a conversion choice in the menus (Notepad++), or e.g. sort of hidden behind an encoding name in the status bar (Visual Studio Code). Anyway, don’t forget to do it!
 
 With the g++ compiler (2) and (3) are already UTF-8 by default, so with g++ you only need to fix (4), the console’s encoding assumption, which you can do via a code snippet such as
@@ -63,6 +65,8 @@ As of 2024 this option is not yet supported by Visual Studio’s project propert
 <img alt="The Visual Studio “Command Line” options" src="images/vs-utf8-option.annotated.png" width="75%"/>
 
 I believe but do not know that the same needs to be done for clang++ in Windows, because in Windows it’s positioned itself roughly as a replacement for Visual C++.
+
+---
 
 You can use the following code to test your setup:
 
